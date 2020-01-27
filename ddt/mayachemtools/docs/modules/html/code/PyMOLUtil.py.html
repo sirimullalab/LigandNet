@@ -1,0 +1,1411 @@
+<html>
+<head>
+<title>MayaChemTools:Code:Python/PyMOLUtil.py</title>
+<meta http-equiv="content-type" content="text/html;charset=utf-8">
+<link rel="stylesheet" type="text/css" href="../../../css/MayaChemToolsPythonCode.css">
+</head>
+<body leftmargin="20" rightmargin="20" topmargin="10" bottommargin="10">
+<br/>
+<center>
+<a href="http://www.mayachemtools.org" title="MayaChemTools Home"><img src="../../../images/MayaChemToolsLogo.gif" border="0" alt="MayaChemTools"></a>
+</center>
+<br/>
+<pre>
+    1 <span class="ch">#!/bin/env python</span>
+    2 <span class="c1"># File: PyMOLUtil.py</span>
+    3 <span class="c1"># Author: Manish Sud &lt;msud@san.rr.com&gt;</span>
+    4 <span class="c1">#</span>
+    5 <span class="c1"># Copyright (C) 2018 Manish Sud. All rights reserved.</span>
+    6 <span class="c1">#</span>
+    7 <span class="c1"># The functionality available in this file is implemented using PyMOL, a</span>
+    8 <span class="c1"># molecular visualization system on an open source foundation originally</span>
+    9 <span class="c1"># developed by Warren DeLano.</span>
+   10 <span class="c1">#</span>
+   11 <span class="c1"># This file is part of MayaChemTools.</span>
+   12 <span class="c1">#</span>
+   13 <span class="c1"># MayaChemTools is free software; you can redistribute it and/or modify it under</span>
+   14 <span class="c1"># the terms of the GNU Lesser General Public License as published by the Free</span>
+   15 <span class="c1"># Software Foundation; either version 3 of the License, or (at your option) any</span>
+   16 <span class="c1"># later version.</span>
+   17 <span class="c1">#</span>
+   18 <span class="c1"># MayaChemTools is distributed in the hope that it will be useful, but without</span>
+   19 <span class="c1"># any warranty; without even the implied warranty of merchantability of fitness</span>
+   20 <span class="c1"># for a particular purpose.  See the GNU Lesser General Public License for more</span>
+   21 <span class="c1"># details.</span>
+   22 <span class="c1">#</span>
+   23 <span class="c1"># You should have received a copy of the GNU Lesser General Public License</span>
+   24 <span class="c1"># along with MayaChemTools; if not, see &lt;http://www.gnu.org/licenses/&gt; or</span>
+   25 <span class="c1"># write to the Free Software Foundation Inc., 59 Temple Place, Suite 330,</span>
+   26 <span class="c1"># Boston, MA, 02111-1307, USA.</span>
+   27 <span class="c1">#</span>
+   28 
+   29 <span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">print_function</span>
+   30 
+   31 <span class="kn">import</span> <span class="nn">os</span>
+   32 <span class="kn">import</span> <span class="nn">sys</span>
+   33 <span class="kn">import</span> <span class="nn">re</span>
+   34 
+   35 <span class="kn">from</span> <span class="nn">pymol</span> <span class="kn">import</span> <span class="n">cmd</span><span class="p">,</span> <span class="n">stored</span><span class="p">,</span> <span class="n">CmdException</span>
+   36 
+   37 <span class="kn">import</span> <span class="nn">MiscUtil</span>
+   38 
+   39 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;CalculateCenterOfMass&quot;</span><span class="p">,</span> <span class="s2">&quot;ConvertFileFormat&quot;</span><span class="p">,</span> <span class="s2">&quot;ConvertPMLFileToPSEFile&quot;</span><span class="p">,</span> <span class="s2">&quot;GetChains&quot;</span><span class="p">,</span> <span class="s2">&quot;GetChainsAndLigandsInfo&quot;</span><span class="p">,</span> <span class="s2">&quot;GetInorganicResiduesInfo&quot;</span><span class="p">,</span> <span class="s2">&quot;GetLargestLigand&quot;</span><span class="p">,</span> <span class="s2">&quot;GetLigandResiduesInfo&quot;</span><span class="p">,</span> <span class="s2">&quot;GetLigands&quot;</span><span class="p">,</span> <span class="s2">&quot;GetMolecules&quot;</span><span class="p">,</span> <span class="s2">&quot;GetPocketInorganicResiduesInfo&quot;</span><span class="p">,</span> <span class="s2">&quot;GetPocketPolymerResiduesInfo&quot;</span><span class="p">,</span> <span class="s2">&quot;GetPocketSolventResiduesInfo&quot;</span><span class="p">,</span> <span class="s2">&quot;GetPolymerResiduesInfo&quot;</span><span class="p">,</span> <span class="s2">&quot;GetSolventResiduesInfo&quot;</span><span class="p">,</span> <span class="s2">&quot;ProcessChainsAndLigandsOptionsInfo&quot;</span><span class="p">,</span> <span class="s2">&quot;SetupPMLForAlignment&quot;</span><span class="p">,</span> <span class="s2">&quot;SetupPMLForBFactorPuttyView&quot;</span><span class="p">,</span> <span class="s2">&quot;SetupPMLForBallAndStickView&quot;</span><span class="p">,</span> <span class="s2">&quot;SetupPMLForEnableDisable&quot;</span><span class="p">,</span> <span class="s2">&quot;SetupPMLForGroup&quot;</span><span class="p">,</span> <span class="s2">&quot;SetupPMLForHydrophobicSurfaceView&quot;</span><span class="p">,</span> <span class="s2">&quot;SetupPMLForInorganicView&quot;</span><span class="p">,</span> <span class="s2">&quot;SetupPMLForLigandPocketInorganicView&quot;</span><span class="p">,</span> <span class="s2">&quot;SetupPMLForLigandPocketSolventView&quot;</span><span class="p">,</span> <span class="s2">&quot;SetupPMLForLigandPocketView&quot;</span><span class="p">,</span> <span class="s2">&quot;SetupPMLForLigandView&quot;</span><span class="p">,</span> <span class="s2">&quot;SetupPMLForPolarContactsView&quot;</span><span class="p">,</span> <span class="s2">&quot;SetupPMLForPolymerChainComplexView&quot;</span><span class="p">,</span> <span class="s2">&quot;SetupPMLForPolymerChainView&quot;</span><span class="p">,</span> <span class="s2">&quot;SetupPMLForPolymerComplexView&quot;</span><span class="p">,</span> <span class="s2">&quot;SetupPMLForSolventView&quot;</span><span class="p">,</span> <span class="s2">&quot;SetupPMLForSurfaceView&quot;</span><span class="p">,</span> <span class="s2">&quot;SetupPMLHeaderInfo&quot;</span><span class="p">]</span>
+   40 
+   41 <span class="k">def</span> <span class="nf">GetMolecules</span><span class="p">(</span><span class="n">Selection</span> <span class="o">=</span> <span class="s2">&quot;all&quot;</span><span class="p">):</span>
+   42     <span class="sd">&quot;&quot;&quot;Get names of molecule objects in a selection or all molecule objects.</span>
+   43 
+   44 <span class="sd">    Arguments:</span>
+   45 <span class="sd">        Selection: (str): A PyMOL selection.</span>
+   46 
+   47 <span class="sd">    Returns:</span>
+   48 <span class="sd">        list: Names of molecule objects.</span>
+   49 
+   50 <span class="sd">    &quot;&quot;&quot;</span>
+   51     <span class="n">Names</span> <span class="o">=</span> <span class="n">cmd</span><span class="o">.</span><span class="n">get_object_list</span><span class="p">(</span><span class="s1">&#39;(&#39;</span> <span class="o">+</span> <span class="n">Selection</span> <span class="o">+</span> <span class="s1">&#39;)&#39;</span><span class="p">)</span>
+   52 
+   53     <span class="k">return</span> <span class="n">Names</span>
+   54 
+   55 <span class="k">def</span> <span class="nf">GetChains</span><span class="p">(</span><span class="n">MoleculeName</span><span class="p">,</span> <span class="n">RemoveEmpty</span> <span class="o">=</span> <span class="bp">True</span><span class="p">):</span>
+   56     <span class="sd">&quot;&quot;&quot;Get chain identifiers present in a molecule.</span>
+   57 
+   58 <span class="sd">    Arguments:</span>
+   59 <span class="sd">        MoleculeName (str): Name of a PyMOL molecule object.</span>
+   60 <span class="sd">        RemoveEmpty (bool): Remove empty chain ID from the list of chain IDs</span>
+   61 <span class="sd">            returned by PyMOL.</span>
+   62 
+   63 <span class="sd">    Returns:</span>
+   64 <span class="sd">        list: Names of chains present in a molecule, sorted alphabetically in a</span>
+   65 <span class="sd">            ascending order.</span>
+   66 
+   67 <span class="sd">    &quot;&quot;&quot;</span>
+   68     <span class="k">if</span> <span class="ow">not</span> <span class="nb">len</span><span class="p">(</span><span class="n">MoleculeName</span><span class="p">):</span>
+   69         <span class="k">return</span> <span class="bp">None</span>
+   70 
+   71     <span class="n">ChainIDs</span> <span class="o">=</span> <span class="p">[]</span>
+   72     <span class="k">try</span><span class="p">:</span>
+   73         <span class="n">ChainIDs</span> <span class="o">=</span> <span class="n">cmd</span><span class="o">.</span><span class="n">get_chains</span><span class="p">(</span><span class="s1">&#39;model </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">MoleculeName</span><span class="p">)</span>
+   74     <span class="k">except</span> <span class="n">CmdException</span> <span class="k">as</span> <span class="n">ErrMsg</span><span class="p">:</span>
+   75         <span class="n">MiscUtil</span><span class="o">.</span><span class="n">PrintWarning</span><span class="p">(</span><span class="s2">&quot;PyMOLUtil.GetChains: Invalid molecule name: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">MoleculeName</span><span class="p">)</span>
+   76 
+   77     <span class="k">if</span> <span class="ow">not</span> <span class="nb">len</span><span class="p">(</span><span class="n">ChainIDs</span><span class="p">):</span>
+   78         <span class="k">return</span> <span class="bp">None</span>
+   79 
+   80     <span class="c1"># Remove empty Chain IDs from the list...</span>
+   81     <span class="k">if</span> <span class="n">RemoveEmpty</span><span class="p">:</span>
+   82         <span class="n">NonEmptyChainIDs</span> <span class="o">=</span> <span class="p">[]</span>
+   83         <span class="k">for</span> <span class="n">ChainID</span> <span class="ow">in</span> <span class="n">ChainIDs</span><span class="p">:</span>
+   84             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">ChainID</span><span class="p">):</span>
+   85                 <span class="n">NonEmptyChainIDs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ChainID</span><span class="p">)</span>
+   86         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">NonEmptyChainIDs</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">ChainIDs</span><span class="p">):</span>
+   87             <span class="n">MiscUtil</span><span class="o">.</span><span class="n">PrintInfo</span><span class="p">(</span><span class="s2">&quot;PyMOLUtil.GetChains: Removing non-empty chain IDs from the list of chain IDs...&quot;</span><span class="p">)</span>
+   88             
+   89         <span class="n">ChainIDs</span> <span class="o">=</span> <span class="n">NonEmptyChainIDs</span>
+   90         
+   91     <span class="k">return</span> <span class="n">ChainIDs</span>
+   92 
+   93 <span class="k">def</span> <span class="nf">GetChainsAndLigandsInfo</span><span class="p">(</span><span class="n">Infile</span><span class="p">,</span> <span class="n">MolName</span><span class="p">,</span> <span class="n">Quite</span> <span class="o">=</span> <span class="bp">False</span><span class="p">,</span> <span class="n">LigandSortBy</span> <span class="o">=</span> <span class="s2">&quot;Size&quot;</span><span class="p">,</span> <span class="n">LigandSortOrder</span> <span class="o">=</span> <span class="s2">&quot;Auto&quot;</span><span class="p">,</span> <span class="n">LigandIgnoreHydrogens</span> <span class="o">=</span> <span class="s2">&quot;Yes&quot;</span><span class="p">):</span>
+   94     <span class="sd">&quot;&quot;&quot;Get chain identifiers present in a molecule along with names of the</span>
+   95 <span class="sd">    ligands present in chains. Ligands are identified using PyMOL &#39;organic&#39;</span>
+   96 <span class="sd">    selection.</span>
+   97 
+   98 <span class="sd">    Arguments:</span>
+   99 <span class="sd">        Infile (str) : Name of a file.</span>
+  100 <span class="sd">        MolName (str) : Name to use for PyMOL molecule object.</span>
+  101 <span class="sd">        Quite (bool) : Flag </span>
+  102 <span class="sd">        LigandSortBy (str): Sort ligand names alphabetically or by size. Possible</span>
+  103 <span class="sd">            values: Alphabetical or Size</span>
+  104 <span class="sd">        LigandSortOrder (str): Sort order for sorting ligands. Possible values:</span>
+  105 <span class="sd">            Ascending, Descending, Auto. The &#39;Auto&#39; value implies automatic</span>
+  106 <span class="sd">            determination of sort order based on the value of &#39;SortBy&#39;.</span>
+  107 <span class="sd">            Automatic defaults: Descending for SortBy value of Size; Ascending</span>
+  108 <span class="sd">            for SortBy value of Alphabetical.</span>
+  109 <span class="sd">        LigandIgnoreHydrogens (str): Ignore hydrogens during determination of ligand</span>
+  110 <span class="sd">            size.</span>
+  111 
+  112 <span class="sd">    Returns:</span>
+  113 <span class="sd">        dict: A dictionary containing list of chain identifiers and dictionaries</span>
+  114 <span class="sd">            of chains containing lists of ligand names for each chain. Names of</span>
+  115 <span class="sd">            ligands present in chain for a molecule sorted by size or</span>
+  116 <span class="sd">            alphabetically.</span>
+  117 
+  118 <span class="sd">    Examples:</span>
+  119 
+  120 <span class="sd">        ChainsAndLigandsInfo = GetChainsAndLigandsInfo(Infile, MolName)</span>
+  121 <span class="sd">        for ChainID in ChainsAndLigandsInfo[&quot;ChainIDs&quot;]:</span>
+  122 <span class="sd">            for LigandID in ChainsAndLigandsInfo[&quot;LigandIDs&quot;][ChainID]:</span>
+  123 <span class="sd">                MiscUtil.PrintInfo(&quot;ChainID: %s; LigandID: %s&quot; % (ChainID,</span>
+  124 <span class="sd">                    LigandID))</span>
+  125 
+  126 <span class="sd">    &quot;&quot;&quot;</span>
+  127     <span class="k">if</span> <span class="ow">not</span> <span class="n">Quite</span><span class="p">:</span>
+  128         <span class="n">MiscUtil</span><span class="o">.</span><span class="n">PrintInfo</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Retrieving chain and ligand information from input file </span><span class="si">%s</span><span class="s2">...&quot;</span> <span class="o">%</span> <span class="n">Infile</span><span class="p">)</span>
+  129     
+  130     <span class="c1"># Collect chains and ligands information with ligands sorted by size to be used for</span>
+  131     <span class="c1"># identification of largest ligand at the top...</span>
+  132     <span class="n">cmd</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">Infile</span><span class="p">,</span> <span class="n">MolName</span><span class="p">)</span>
+  133     <span class="n">ChainsAndLigandsInfo</span> <span class="o">=</span> <span class="n">_GetChainsAndLigands</span><span class="p">(</span><span class="n">MolName</span><span class="p">,</span> <span class="n">LigandSortBy</span> <span class="o">=</span> <span class="s2">&quot;size&quot;</span><span class="p">,</span> <span class="n">LigandSortOrder</span> <span class="o">=</span> <span class="s2">&quot;descending&quot;</span><span class="p">)</span>
+  134     <span class="n">cmd</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="n">MolName</span><span class="p">)</span>
+  135 
+  136     <span class="c1"># Print out chain and ligand IDs...</span>
+  137     <span class="k">if</span> <span class="ow">not</span> <span class="n">Quite</span><span class="p">:</span>
+  138         <span class="n">ChainIDs</span> <span class="o">=</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">ChainsAndLigandsInfo</span><span class="p">[</span><span class="s2">&quot;ChainIDs&quot;</span><span class="p">])</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">ChainsAndLigandsInfo</span><span class="p">[</span><span class="s2">&quot;ChainIDs&quot;</span><span class="p">])</span> <span class="k">else</span> <span class="s2">&quot;None&quot;</span>
+  139         <span class="n">MiscUtil</span><span class="o">.</span><span class="n">PrintInfo</span><span class="p">(</span><span class="s2">&quot;Chain IDs: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">ChainIDs</span><span class="p">)</span>
+  140         
+  141         <span class="k">for</span> <span class="n">ChainID</span> <span class="ow">in</span> <span class="n">ChainsAndLigandsInfo</span><span class="p">[</span><span class="s2">&quot;ChainIDs&quot;</span><span class="p">]:</span>
+  142             <span class="n">LigandIDs</span> <span class="o">=</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">ChainsAndLigandsInfo</span><span class="p">[</span><span class="s2">&quot;LigandIDs&quot;</span><span class="p">][</span><span class="n">ChainID</span><span class="p">])</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">ChainsAndLigandsInfo</span><span class="p">[</span><span class="s2">&quot;LigandIDs&quot;</span><span class="p">][</span><span class="n">ChainID</span><span class="p">])</span> <span class="k">else</span> <span class="s2">&quot;None&quot;</span>
+  143             <span class="n">MiscUtil</span><span class="o">.</span><span class="n">PrintInfo</span><span class="p">(</span><span class="s2">&quot;Chain ID: </span><span class="si">%s</span><span class="s2">; LigandIDs: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">ChainID</span><span class="p">,</span> <span class="n">LigandIDs</span><span class="p">))</span>
+  144     
+  145     <span class="k">return</span> <span class="n">ChainsAndLigandsInfo</span>
+  146 
+  147 <span class="k">def</span> <span class="nf">GetLigands</span><span class="p">(</span><span class="n">MoleculeName</span><span class="p">,</span> <span class="n">ChainName</span><span class="p">,</span> <span class="n">SortBy</span> <span class="o">=</span> <span class="s2">&quot;Size&quot;</span><span class="p">,</span> <span class="n">SortOrder</span> <span class="o">=</span> <span class="s2">&quot;Auto&quot;</span><span class="p">,</span> <span class="n">IgnoreHydrogens</span> <span class="o">=</span> <span class="s2">&quot;Yes&quot;</span><span class="p">):</span>
+  148     <span class="sd">&quot;&quot;&quot;Get names of ligands present in a chain of a  molecule. Ligands are</span>
+  149 <span class="sd">    identified using PyMOL &#39;organic&#39; selection.</span>
+  150 
+  151 <span class="sd">    Arguments:</span>
+  152 <span class="sd">        MoleculeName (str): Name of a PyMOL molecule object.</span>
+  153 <span class="sd">        ChainName (str): Name of a chain in a molecule.</span>
+  154 <span class="sd">        SortBy (str): Sort ligand names alphabetically or by size. Possible</span>
+  155 <span class="sd">            values: Alphabetical or Size</span>
+  156 <span class="sd">        SortOrder (str): Sort order for sorting ligands. Possible values:</span>
+  157 <span class="sd">            Ascending, Descending, Auto. The &#39;Auto&#39; value implies automatic</span>
+  158 <span class="sd">            determination of sort order based on the value of &#39;SortBy&#39;.</span>
+  159 <span class="sd">            Automatic defaults: Descending for SortBy value of Size; Ascending</span>
+  160 <span class="sd">            for SortBy value of Alphabetical.</span>
+  161 <span class="sd">        IgnoreHydrogens (str): Ignore hydrogens during determination of ligand</span>
+  162 <span class="sd">            size.</span>
+  163 
+  164 <span class="sd">    Returns:</span>
+  165 <span class="sd">        list: Names of ligands present in chain for a molecule sorted by size</span>
+  166 <span class="sd">            or alphabetically.</span>
+  167 
+  168 <span class="sd">    &quot;&quot;&quot;</span>
+  169     <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">MoleculeName</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">ChainName</span><span class="p">)):</span>
+  170         <span class="k">return</span> <span class="bp">None</span>
+  171 
+  172     <span class="n">LigandsInfoMap</span> <span class="o">=</span> <span class="n">_GetLigandsInfo</span><span class="p">(</span><span class="n">MoleculeName</span><span class="p">,</span> <span class="n">ChainName</span><span class="p">,</span> <span class="n">SortBy</span><span class="p">,</span> <span class="n">SortOrder</span><span class="p">,</span> <span class="n">IgnoreHydrogens</span><span class="p">)</span>
+  173     
+  174     <span class="n">LigandIDs</span> <span class="o">=</span> <span class="n">LigandsInfoMap</span><span class="p">[</span><span class="s2">&quot;LigandResNames&quot;</span><span class="p">]</span>
+  175     <span class="k">if</span> <span class="ow">not</span> <span class="nb">len</span><span class="p">(</span><span class="n">LigandIDs</span><span class="p">):</span>
+  176         <span class="n">LigandIDs</span> <span class="o">=</span> <span class="bp">None</span>
+  177     
+  178     <span class="k">return</span> <span class="n">LigandIDs</span>
+  179 
+  180 <span class="k">def</span> <span class="nf">GetLargestLigand</span><span class="p">(</span><span class="n">MoleculeName</span><span class="p">,</span> <span class="n">ChainName</span><span class="p">,</span> <span class="n">IgnoreHydrogens</span> <span class="o">=</span> <span class="s1">&#39;Yes&#39;</span><span class="p">):</span>
+  181     <span class="sd">&quot;&quot;&quot;Get name of the largest ligand for a chain present in a molecule. Ligands</span>
+  182 <span class="sd">    are identified using PyMOL &#39;organic&#39; selection.</span>
+  183 
+  184 <span class="sd">    Arguments:</span>
+  185 <span class="sd">        IgnoreHydrogens (str): Ignore hydrogens during determination of ligand</span>
+  186 <span class="sd">            size.</span>
+  187 
+  188 <span class="sd">    Returns:</span>
+  189 <span class="sd">        str: Name of the largest ligand present in a chain. </span>
+  190 
+  191 <span class="sd">    &quot;&quot;&quot;</span>
+  192     <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">MoleculeName</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">ChainName</span><span class="p">)):</span>
+  193         <span class="k">return</span> <span class="bp">None</span>
+  194 
+  195     <span class="n">SortBy</span> <span class="o">=</span> <span class="s2">&quot;Size&quot;</span>
+  196     <span class="n">SortOrder</span> <span class="o">=</span> <span class="s2">&quot;Descending&quot;</span>
+  197     <span class="n">LigandsInfoMap</span> <span class="o">=</span> <span class="n">_GetLigandsInfo</span><span class="p">(</span><span class="n">MoleculeName</span><span class="p">,</span> <span class="n">ChainName</span><span class="p">,</span> <span class="n">SortBy</span><span class="p">,</span> <span class="n">SortOrder</span><span class="p">,</span> <span class="n">IgnoreHydrogens</span><span class="p">)</span>
+  198     <span class="n">LigandIDs</span> <span class="o">=</span> <span class="n">LigandsInfoMap</span><span class="p">[</span><span class="s2">&quot;LigandResNames&quot;</span><span class="p">]</span>
+  199     
+  200     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">LigandIDs</span><span class="p">):</span>
+  201         <span class="n">LigandID</span> <span class="o">=</span> <span class="n">LigandIDs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+  202     <span class="k">else</span><span class="p">:</span>
+  203         <span class="n">LigandID</span> <span class="o">=</span> <span class="bp">None</span>
+  204 
+  205     <span class="k">return</span> <span class="n">LigandID</span>
+  206 
+  207 <span class="k">def</span> <span class="nf">_GetChainsAndLigands</span><span class="p">(</span><span class="n">MoleculeName</span><span class="p">,</span> <span class="n">LigandSortBy</span> <span class="o">=</span> <span class="s2">&quot;Size&quot;</span><span class="p">,</span> <span class="n">LigandSortOrder</span> <span class="o">=</span> <span class="s2">&quot;Auto&quot;</span><span class="p">,</span> <span class="n">LigandIgnoreHydrogens</span> <span class="o">=</span> <span class="s2">&quot;Yes&quot;</span><span class="p">):</span>
+  208     <span class="sd">&quot;&quot;&quot;Get chain identifiers in a molecule along with names of the ligands</span>
+  209 <span class="sd">    present in chains. Ligands are identified using PyMOL &#39;organic&#39; selection.</span>
+  210 <span class="sd">    &quot;&quot;&quot;</span>
+  211     <span class="k">if</span> <span class="ow">not</span> <span class="nb">len</span><span class="p">(</span><span class="n">MoleculeName</span><span class="p">):</span>
+  212         <span class="k">return</span> <span class="bp">None</span>
+  213 
+  214     <span class="n">ChainIDs</span> <span class="o">=</span> <span class="n">GetChains</span><span class="p">(</span><span class="n">MoleculeName</span><span class="p">)</span>
+  215     <span class="k">if</span> <span class="n">ChainIDs</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+  216         <span class="k">return</span> <span class="bp">None</span>
+  217         
+  218     <span class="n">ChainsAndLigandsMap</span> <span class="o">=</span> <span class="p">{}</span>
+  219     <span class="n">ChainsAndLigandsMap</span><span class="p">[</span><span class="s2">&quot;ChainIDs&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+  220     <span class="n">ChainsAndLigandsMap</span><span class="p">[</span><span class="s2">&quot;LigandIDs&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+  221     
+  222     <span class="k">for</span> <span class="n">ChainID</span> <span class="ow">in</span> <span class="n">ChainIDs</span><span class="p">:</span>
+  223         <span class="n">ChainsAndLigandsMap</span><span class="p">[</span><span class="s2">&quot;ChainIDs&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ChainID</span><span class="p">)</span>
+  224         <span class="n">ChainsAndLigandsMap</span><span class="p">[</span><span class="s2">&quot;LigandIDs&quot;</span><span class="p">][</span><span class="n">ChainID</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+  225         
+  226         <span class="n">LigandIDs</span> <span class="o">=</span> <span class="n">GetLigands</span><span class="p">(</span><span class="n">MoleculeName</span><span class="p">,</span> <span class="n">ChainID</span><span class="p">,</span> <span class="n">SortBy</span> <span class="o">=</span> <span class="n">LigandSortBy</span><span class="p">,</span> <span class="n">SortOrder</span> <span class="o">=</span> <span class="n">LigandSortOrder</span><span class="p">,</span> <span class="n">IgnoreHydrogens</span> <span class="o">=</span> <span class="n">LigandIgnoreHydrogens</span><span class="p">)</span>
+  227         <span class="k">if</span> <span class="n">LigandIDs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+  228             <span class="n">ChainsAndLigandsMap</span><span class="p">[</span><span class="s2">&quot;LigandIDs&quot;</span><span class="p">][</span><span class="n">ChainID</span><span class="p">]</span> <span class="o">=</span> <span class="n">LigandIDs</span>
+  229         
+  230     <span class="k">return</span> <span class="n">ChainsAndLigandsMap</span>
+  231 
+  232 <span class="k">def</span> <span class="nf">_GetLigandsInfo</span><span class="p">(</span><span class="n">MoleculeName</span><span class="p">,</span> <span class="n">ChainName</span><span class="p">,</span> <span class="n">SortBy</span> <span class="o">=</span> <span class="s2">&quot;Size&quot;</span><span class="p">,</span> <span class="n">SortOrder</span> <span class="o">=</span> <span class="s2">&quot;Auto&quot;</span><span class="p">,</span> <span class="n">IgnoreHydrogens</span> <span class="o">=</span> <span class="s2">&quot;Yes&quot;</span><span class="p">):</span>
+  233     <span class="sd">&quot;&quot;&quot;Retrieve information about ligands present in a chain of a molecule.&quot;&quot;&quot;</span>
+  234 
+  235     <span class="k">if</span> <span class="ow">not</span> <span class="n">MiscUtil</span><span class="o">.</span><span class="n">CheckTextValue</span><span class="p">(</span><span class="n">SortBy</span><span class="p">,</span> <span class="s2">&quot;Size Alphabetical&quot;</span><span class="p">):</span>
+  236         <span class="n">MiscUtil</span><span class="o">.</span><span class="n">PrintError</span><span class="p">(</span><span class="s2">&quot;PyMOLUtil._GetLigandsInfo: The value specified, </span><span class="si">%s</span><span class="s2">, for parameter SortBy is not valid. SupportedValues: Size Alphabetical&quot;</span> <span class="o">%</span> <span class="n">SortBy</span><span class="p">)</span>
+  237         
+  238     <span class="k">if</span> <span class="ow">not</span> <span class="n">MiscUtil</span><span class="o">.</span><span class="n">CheckTextValue</span><span class="p">(</span><span class="n">SortOrder</span><span class="p">,</span> <span class="s2">&quot;Ascending Descending Auto&quot;</span><span class="p">):</span>
+  239         <span class="n">MiscUtil</span><span class="o">.</span><span class="n">PrintError</span><span class="p">(</span><span class="s2">&quot;PyMOLUtil._GetLigandsInfo: The value specified, </span><span class="si">%s</span><span class="s2">, for parameter SortOrder is not valid. SupportedValues: Ascending Descending Auto&quot;</span> <span class="o">%</span> <span class="n">SortOrder</span><span class="p">)</span>
+  240         
+  241     <span class="k">if</span> <span class="ow">not</span> <span class="n">MiscUtil</span><span class="o">.</span><span class="n">CheckTextValue</span><span class="p">(</span><span class="n">IgnoreHydrogens</span><span class="p">,</span> <span class="s2">&quot;Yes No&quot;</span><span class="p">):</span>
+  242         <span class="n">MiscUtil</span><span class="o">.</span><span class="n">PrintError</span><span class="p">(</span><span class="s2">&quot;PyMOLUtil._GetLigandsInfo: The value specified, </span><span class="si">%s</span><span class="s2">, for parameter IgnoreHydrogens is not valid. SupportedValues: Yes No&quot;</span> <span class="o">%</span> <span class="n">IgnoreHydrogens</span><span class="p">)</span>
+  243         
+  244     <span class="n">SortBySize</span> <span class="o">=</span> <span class="bp">True</span> <span class="k">if</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="s2">&quot;^Size$&quot;</span><span class="p">,</span> <span class="n">SortBy</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">I</span><span class="p">)</span> <span class="k">else</span> <span class="bp">False</span>
+  245     <span class="k">if</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="s2">&quot;^Auto$&quot;</span><span class="p">,</span> <span class="n">SortOrder</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">I</span><span class="p">):</span>
+  246         <span class="n">SortOrderDescending</span> <span class="o">=</span> <span class="bp">True</span> <span class="k">if</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="s2">&quot;^Size$&quot;</span><span class="p">,</span> <span class="n">SortBy</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">I</span><span class="p">)</span> <span class="k">else</span> <span class="bp">False</span>
+  247     <span class="k">else</span><span class="p">:</span>
+  248         <span class="n">SortOrderDescending</span> <span class="o">=</span> <span class="bp">True</span> <span class="k">if</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="s2">&quot;^Descending$&quot;</span><span class="p">,</span> <span class="n">SortOrder</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">I</span><span class="p">)</span> <span class="k">else</span> <span class="bp">False</span>
+  249     <span class="n">IgnoreHydrogenAtoms</span> <span class="o">=</span> <span class="bp">True</span> <span class="k">if</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="s2">&quot;^Yes$&quot;</span><span class="p">,</span> <span class="n">IgnoreHydrogens</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">I</span><span class="p">)</span> <span class="k">else</span> <span class="bp">False</span>
+  250 
+  251     <span class="c1"># Set up a command to retrieve all appropriate ligand atoms in organic ligands...</span>
+  252     <span class="n">SelectionCmd</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">%s</span><span class="s2"> and chain </span><span class="si">%s</span><span class="s2"> and organic&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">MoleculeName</span><span class="p">,</span> <span class="n">ChainName</span><span class="p">)</span>
+  253     <span class="k">if</span> <span class="n">IgnoreHydrogenAtoms</span><span class="p">:</span>
+  254         <span class="n">SelectionCmd</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">%s</span><span class="s2"> and not hydro&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">SelectionCmd</span><span class="p">)</span>
+  255 
+  256     <span class="c1"># Retrieve atoms...</span>
+  257     <span class="n">stored</span><span class="o">.</span><span class="n">LigandsInfo</span> <span class="o">=</span> <span class="p">[]</span>
+  258     <span class="n">cmd</span><span class="o">.</span><span class="n">iterate</span><span class="p">(</span><span class="n">SelectionCmd</span><span class="p">,</span> <span class="s2">&quot;stored.LigandsInfo.append([resi, resn])&quot;</span><span class="p">)</span>
+  259 
+  260     <span class="c1"># Retrieve ligands...</span>
+  261     <span class="n">LigandsInfoMap</span> <span class="o">=</span> <span class="p">{}</span>
+  262     <span class="n">LigandsInfoMap</span><span class="p">[</span><span class="s2">&quot;LigandResNames&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+  263     <span class="n">LigandsInfoMap</span><span class="p">[</span><span class="s2">&quot;LigandAtomCount&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+  264     <span class="n">LigandsInfoMap</span><span class="p">[</span><span class="s2">&quot;LigandResNumber&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+  265     
+  266     <span class="k">for</span> <span class="n">LigandResNum</span><span class="p">,</span> <span class="n">LigandResName</span> <span class="ow">in</span> <span class="n">stored</span><span class="o">.</span><span class="n">LigandsInfo</span><span class="p">:</span>
+  267         <span class="k">if</span> <span class="n">LigandResName</span> <span class="ow">in</span> <span class="n">LigandsInfoMap</span><span class="p">[</span><span class="s2">&quot;LigandResNames&quot;</span><span class="p">]:</span>
+  268             <span class="n">LigandsInfoMap</span><span class="p">[</span><span class="s2">&quot;LigandAtomCount&quot;</span><span class="p">][</span><span class="n">LigandResName</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+  269         <span class="k">else</span><span class="p">:</span>
+  270             <span class="n">LigandsInfoMap</span><span class="p">[</span><span class="s2">&quot;LigandResNames&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">LigandResName</span><span class="p">)</span>
+  271             <span class="n">LigandsInfoMap</span><span class="p">[</span><span class="s2">&quot;LigandAtomCount&quot;</span><span class="p">][</span><span class="n">LigandResName</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+  272             <span class="n">LigandsInfoMap</span><span class="p">[</span><span class="s2">&quot;LigandResNumber&quot;</span><span class="p">][</span><span class="n">LigandResName</span><span class="p">]</span> <span class="o">=</span> <span class="n">LigandResNum</span>
+  273 
+  274     <span class="k">if</span> <span class="ow">not</span> <span class="nb">len</span><span class="p">(</span><span class="n">LigandsInfoMap</span><span class="p">[</span><span class="s2">&quot;LigandResNames&quot;</span><span class="p">]):</span>
+  275         <span class="k">return</span> <span class="n">LigandsInfoMap</span>
+  276         
+  277     <span class="c1"># Sort ligand names...</span>
+  278     <span class="n">ReverseOrder</span> <span class="o">=</span> <span class="bp">True</span> <span class="k">if</span> <span class="n">SortOrderDescending</span> <span class="k">else</span> <span class="bp">False</span>
+  279     <span class="k">if</span> <span class="n">SortBySize</span><span class="p">:</span>
+  280         <span class="n">SortedLigandResNames</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">LigandsInfoMap</span><span class="p">[</span><span class="s2">&quot;LigandResNames&quot;</span><span class="p">],</span> <span class="n">key</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">LigandResName</span><span class="p">:</span> <span class="n">LigandsInfoMap</span><span class="p">[</span><span class="s2">&quot;LigandAtomCount&quot;</span><span class="p">][</span><span class="n">LigandResName</span><span class="p">],</span> <span class="n">reverse</span> <span class="o">=</span> <span class="n">ReverseOrder</span><span class="p">)</span>
+  281     <span class="k">else</span><span class="p">:</span>
+  282         <span class="c1"># Sort alphabetically...</span>
+  283         <span class="n">SortedLigandResNames</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">LigandsInfoMap</span><span class="p">[</span><span class="s2">&quot;LigandResNames&quot;</span><span class="p">],</span> <span class="n">reverse</span> <span class="o">=</span> <span class="n">ReverseOrder</span><span class="p">)</span>
+  284 
+  285     <span class="n">LigandsInfoMap</span><span class="p">[</span><span class="s2">&quot;LigandResNames&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">SortedLigandResNames</span>
+  286     
+  287     <span class="k">return</span> <span class="n">LigandsInfoMap</span>
+  288 
+  289 <span class="k">def</span> <span class="nf">GetPolymerResiduesInfo</span><span class="p">(</span><span class="n">MoleculeName</span><span class="p">,</span> <span class="n">ChainName</span><span class="p">):</span>
+  290     <span class="sd">&quot;&quot;&quot;Get information for residues present in a chain of a  molecule.</span>
+  291 <span class="sd">    Chains are identified using PyMOL &#39;polymer&#39; selection.</span>
+  292 
+  293 <span class="sd">    Arguments:</span>
+  294 <span class="sd">        MoleculeName (str): Name of a PyMOL molecule object.</span>
+  295 <span class="sd">        ChainName (str): Name of a chain in a molecule.</span>
+  296 
+  297 <span class="sd">    Returns:</span>
+  298 <span class="sd">        dict: A dictionary containing list of residue names and dictionaries of</span>
+  299 <span class="sd">            residue numbers and residue count for each residue. Names of </span>
+  300 <span class="sd">            residues in the dictionary are not sorted.</span>
+  301 
+  302 <span class="sd">    Examples:</span>
+  303 
+  304 <span class="sd">        ResiduesInfo = GetPolymerResiduesInfo(MolName, ChainName)</span>
+  305 <span class="sd">        for ResName in ResiduesInfo[&quot;ResNames&quot;]:</span>
+  306 <span class="sd">            ResCount = ResiduesInfo[&quot;ResCount&quot;][ResName]</span>
+  307 <span class="sd">            ResNums = ResiduesInfo[&quot;ResNum&quot;][ResName]</span>
+  308 <span class="sd">            MiscUtil.PrintInfo(&quot;ResName: %s; ResCount: %s; ResNums: %s&quot; %</span>
+  309 <span class="sd">                (ResName, ResCount, ResNums))</span>
+  310 
+  311 <span class="sd">    &quot;&quot;&quot;</span>
+  312     <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">MoleculeName</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">ChainName</span><span class="p">)):</span>
+  313         <span class="k">return</span> <span class="bp">None</span>
+  314 
+  315     <span class="n">SelectionCmd</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">%s</span><span class="s2"> and chain </span><span class="si">%s</span><span class="s2"> and polymer&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">MoleculeName</span><span class="p">,</span> <span class="n">ChainName</span><span class="p">)</span>
+  316     <span class="n">ResiduesInfoMap</span> <span class="o">=</span> <span class="n">_GetSelectionResiduesInfo</span><span class="p">(</span><span class="n">SelectionCmd</span><span class="p">)</span>
+  317 
+  318     <span class="k">return</span> <span class="n">ResiduesInfoMap</span>
+  319 
+  320 <span class="k">def</span> <span class="nf">GetSolventResiduesInfo</span><span class="p">(</span><span class="n">MoleculeName</span><span class="p">,</span> <span class="n">ChainName</span><span class="p">):</span>
+  321     <span class="sd">&quot;&quot;&quot;Get information for solvent residues present in a chain of a  molecule.</span>
+  322 <span class="sd">    Solvents are identified using PyMOL &#39;solvent&#39; selection.</span>
+  323 
+  324 <span class="sd">    Arguments:</span>
+  325 <span class="sd">        MoleculeName (str): Name of a PyMOL molecule object.</span>
+  326 <span class="sd">        ChainName (str): Name of a chain in a molecule.</span>
+  327 
+  328 <span class="sd">    Returns:</span>
+  329 <span class="sd">        dict: A dictionary containing list of residue names and dictionaries of</span>
+  330 <span class="sd">            residue numbers and residue count for each residue. Names of </span>
+  331 <span class="sd">            residues in the dictionary are not sorted.</span>
+  332 
+  333 <span class="sd">    Examples:</span>
+  334 
+  335 <span class="sd">        ResiduesInfo = GetSolventResiduesInfo(MolName, ChainName)</span>
+  336 <span class="sd">        for ResName in ResiduesInfo[&quot;ResNames&quot;]:</span>
+  337 <span class="sd">            ResCount = ResiduesInfo[&quot;ResCount&quot;][ResName]</span>
+  338 <span class="sd">            ResNums = ResiduesInfo[&quot;ResNum&quot;][ResName]</span>
+  339 <span class="sd">            MiscUtil.PrintInfo(&quot;ResName: %s; ResCount: %s; ResNums: %s&quot; %</span>
+  340 <span class="sd">                (ResName, ResCount, ResNums))</span>
+  341 
+  342 <span class="sd">    &quot;&quot;&quot;</span>
+  343     <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">MoleculeName</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">ChainName</span><span class="p">)):</span>
+  344         <span class="k">return</span> <span class="bp">None</span>
+  345 
+  346     <span class="n">SelectionCmd</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">%s</span><span class="s2"> and chain </span><span class="si">%s</span><span class="s2"> and solvent&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">MoleculeName</span><span class="p">,</span> <span class="n">ChainName</span><span class="p">)</span>
+  347     <span class="n">ResiduesInfoMap</span> <span class="o">=</span> <span class="n">_GetSelectionResiduesInfo</span><span class="p">(</span><span class="n">SelectionCmd</span><span class="p">)</span>
+  348 
+  349     <span class="k">return</span> <span class="n">ResiduesInfoMap</span>
+  350 
+  351 <span class="k">def</span> <span class="nf">GetInorganicResiduesInfo</span><span class="p">(</span><span class="n">MoleculeName</span><span class="p">,</span> <span class="n">ChainName</span><span class="p">):</span>
+  352     <span class="sd">&quot;&quot;&quot;Get information for inorganic residues present in a chain of a  molecule.</span>
+  353 <span class="sd">    Inorganic residues are identified using PyMOL &#39;inorganic&#39; selection.</span>
+  354 
+  355 <span class="sd">    Arguments:</span>
+  356 <span class="sd">        MoleculeName (str): Name of a PyMOL molecule object.</span>
+  357 <span class="sd">        ChainName (str): Name of a chain in a molecule.</span>
+  358 
+  359 <span class="sd">    Returns:</span>
+  360 <span class="sd">        dict: A dictionary containing list of residue names and dictionaries of</span>
+  361 <span class="sd">            residue numbers and residue count for each residue. Names of </span>
+  362 <span class="sd">            residues in the dictionary are not sorted.</span>
+  363 
+  364 <span class="sd">    Examples:</span>
+  365 
+  366 <span class="sd">        ResiduesInfo = GetInorganicResiduesInfo(MolName, ChainName)</span>
+  367 <span class="sd">        for ResName in ResiduesInfo[&quot;ResNames&quot;]:</span>
+  368 <span class="sd">            ResCount = ResiduesInfo[&quot;ResCount&quot;][ResName]</span>
+  369 <span class="sd">            ResNums = ResiduesInfo[&quot;ResNum&quot;][ResName]</span>
+  370 <span class="sd">            MiscUtil.PrintInfo(&quot;ResName: %s; ResCount: %s; ResNums: %s&quot; %</span>
+  371 <span class="sd">                (ResName, ResCount, ResNums))</span>
+  372 
+  373 <span class="sd">    &quot;&quot;&quot;</span>
+  374     <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">MoleculeName</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">ChainName</span><span class="p">)):</span>
+  375         <span class="k">return</span> <span class="bp">None</span>
+  376 
+  377     <span class="n">SelectionCmd</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">%s</span><span class="s2"> and chain </span><span class="si">%s</span><span class="s2"> and inorganic&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">MoleculeName</span><span class="p">,</span> <span class="n">ChainName</span><span class="p">)</span>
+  378     <span class="n">ResiduesInfoMap</span> <span class="o">=</span> <span class="n">_GetSelectionResiduesInfo</span><span class="p">(</span><span class="n">SelectionCmd</span><span class="p">)</span>
+  379 
+  380     <span class="k">return</span> <span class="n">ResiduesInfoMap</span>
+  381 
+  382 <span class="k">def</span> <span class="nf">GetLigandResiduesInfo</span><span class="p">(</span><span class="n">MoleculeName</span><span class="p">,</span> <span class="n">ChainName</span><span class="p">):</span>
+  383     <span class="sd">&quot;&quot;&quot;Get information for ligand residues present in a chain of a  molecule.</span>
+  384 <span class="sd">    Ligands are identified using PyMOL &#39;organic&#39; selection.</span>
+  385 
+  386 <span class="sd">    Arguments:</span>
+  387 <span class="sd">        MoleculeName (str): Name of a PyMOL molecule object.</span>
+  388 <span class="sd">        ChainName (str): Name of a chain in a molecule.</span>
+  389 
+  390 <span class="sd">    Returns:</span>
+  391 <span class="sd">        dict: A dictionary containing list of residue names and dictionaries of</span>
+  392 <span class="sd">            residue numbers and residue count for each residue. Names of </span>
+  393 <span class="sd">            residues in the dictionary are not sorted.</span>
+  394 
+  395 <span class="sd">    Examples:</span>
+  396 
+  397 <span class="sd">        ResiduesInfo = GetLigandResiduesInfo(MolName, ChainName)</span>
+  398 <span class="sd">        for ResName in ResiduesInfo[&quot;ResNames&quot;]:</span>
+  399 <span class="sd">            ResCount = ResiduesInfo[&quot;ResCount&quot;][ResName]</span>
+  400 <span class="sd">            ResNums = ResiduesInfo[&quot;ResNum&quot;][ResName]</span>
+  401 <span class="sd">            MiscUtil.PrintInfo(&quot;ResName: %s; ResCount: %s; ResNums: %s&quot; %</span>
+  402 <span class="sd">                (ResName, ResCount, ResNums))</span>
+  403 
+  404 <span class="sd">    &quot;&quot;&quot;</span>
+  405     <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">MoleculeName</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">ChainName</span><span class="p">)):</span>
+  406         <span class="k">return</span> <span class="bp">None</span>
+  407 
+  408     <span class="n">SelectionCmd</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">%s</span><span class="s2"> and chain </span><span class="si">%s</span><span class="s2"> and organic&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">MoleculeName</span><span class="p">,</span> <span class="n">ChainName</span><span class="p">)</span>
+  409     <span class="n">ResiduesInfoMap</span> <span class="o">=</span> <span class="n">_GetSelectionResiduesInfo</span><span class="p">(</span><span class="n">SelectionCmd</span><span class="p">)</span>
+  410 
+  411     <span class="k">return</span> <span class="n">ResiduesInfoMap</span>
+  412 
+  413 <span class="k">def</span> <span class="nf">GetPocketPolymerResiduesInfo</span><span class="p">(</span><span class="n">MoleculeName</span><span class="p">,</span> <span class="n">ChainName</span><span class="p">,</span> <span class="n">LigandResName</span><span class="p">,</span> <span class="n">LigandResNum</span><span class="p">,</span> <span class="n">PocketDistanceCutoff</span><span class="p">):</span>
+  414     <span class="sd">&quot;&quot;&quot;Get information for chain residues present in a pocket around a ligand</span>
+  415 <span class="sd">    in a molecule. Polymer residues are identified using negation of PyMOL</span>
+  416 <span class="sd">    selection operators &#39;organic&#39;, &#39;solvent&#39;, and &#39;inorganic&#39;.</span>
+  417 
+  418 <span class="sd">    Arguments:</span>
+  419 <span class="sd">        MoleculeName (str): Name of a PyMOL molecule object.</span>
+  420 <span class="sd">        ChainName (str): Name of a chain in a molecule.</span>
+  421 <span class="sd">        LigandResName (str): Residue name of a ligand in a chain.</span>
+  422 <span class="sd">        LigandResNum (str): Residue number of a ligand in a chain.</span>
+  423 <span class="sd">        PocketDistanceCutoff (float): Distance around ligand to identify pocket</span>
+  424 <span class="sd">            residues.</span>
+  425 
+  426 <span class="sd">    Returns:</span>
+  427 <span class="sd">        dict: A dictionary containing list of residue names and dictionaries of</span>
+  428 <span class="sd">            residue numbers and residue count for each residue. Names of </span>
+  429 <span class="sd">            residues in the dictionary are not sorted.</span>
+  430 
+  431 <span class="sd">    Examples:</span>
+  432 
+  433 <span class="sd">        ResiduesInfo = GetPocketPolymerResiduesInfo(MolName, ChainName)</span>
+  434 <span class="sd">        for ResName in ResiduesInfo[&quot;ResNames&quot;]:</span>
+  435 <span class="sd">            ResCount = ResiduesInfo[&quot;ResCount&quot;][ResName]</span>
+  436 <span class="sd">            ResNums = ResiduesInfo[&quot;ResNum&quot;][ResName]</span>
+  437 <span class="sd">            MiscUtil.PrintInfo(&quot;ResName: %s; ResCount: %s; ResNums: %s&quot; %</span>
+  438 <span class="sd">                (ResName, ResCount, ResNums))</span>
+  439 
+  440 <span class="sd">    &quot;&quot;&quot;</span>
+  441     <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">MoleculeName</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">ChainName</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">LigandResName</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">LigandResNum</span><span class="p">)):</span>
+  442         <span class="k">return</span> <span class="bp">None</span>
+  443 
+  444     <span class="n">LigandSelection</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">%s</span><span class="s2"> and chain </span><span class="si">%s</span><span class="s2"> and organic and resn </span><span class="si">%s</span><span class="s2"> and resi </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">MoleculeName</span><span class="p">,</span> <span class="n">ChainName</span><span class="p">,</span> <span class="n">LigandResName</span><span class="p">,</span> <span class="n">LigandResNum</span><span class="p">)</span>
+  445     <span class="n">MoleculeSelection</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">%s</span><span class="s2"> and chain </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">MoleculeName</span><span class="p">,</span> <span class="n">ChainName</span><span class="p">)</span>
+  446     <span class="n">SelectionCmd</span> <span class="o">=</span> <span class="s2">&quot;((byresidue (</span><span class="si">%s</span><span class="s2">) within </span><span class="si">%.1f</span><span class="s2"> of (</span><span class="si">%s</span><span class="s2">))  and (not solvent) and (not inorganic) and (not organic))&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">MoleculeSelection</span><span class="p">,</span> <span class="n">PocketDistanceCutoff</span><span class="p">,</span> <span class="n">LigandSelection</span><span class="p">)</span>
+  447 
+  448     <span class="n">ResiduesInfoMap</span> <span class="o">=</span> <span class="n">_GetSelectionResiduesInfo</span><span class="p">(</span><span class="n">SelectionCmd</span><span class="p">)</span>
+  449 
+  450     <span class="k">return</span> <span class="n">ResiduesInfoMap</span>
+  451 
+  452 <span class="k">def</span> <span class="nf">GetPocketSolventResiduesInfo</span><span class="p">(</span><span class="n">MoleculeName</span><span class="p">,</span> <span class="n">ChainName</span><span class="p">,</span> <span class="n">LigandResName</span><span class="p">,</span> <span class="n">LigandResNum</span><span class="p">,</span> <span class="n">PocketDistanceCutoff</span><span class="p">):</span>
+  453     <span class="sd">&quot;&quot;&quot;Get information for solvent residues present in a pocket around a ligand</span>
+  454 <span class="sd">    in a molecule. Solvent residues are identified using PyMOL &#39;solvent&#39;</span>
+  455 <span class="sd">    selection.</span>
+  456 
+  457 <span class="sd">    Arguments:</span>
+  458 <span class="sd">        MoleculeName (str): Name of a PyMOL molecule object.</span>
+  459 <span class="sd">        ChainName (str): Name of a chain in a molecule.</span>
+  460 <span class="sd">        LigandResName (str): Residue name of a ligand in a chain.</span>
+  461 <span class="sd">        LigandResNum (str): Residue number of a ligand in a chain.</span>
+  462 <span class="sd">        PocketDistanceCutoff (float): Distance around ligand to identify pocket</span>
+  463 <span class="sd">            residues.</span>
+  464 
+  465 <span class="sd">    Returns:</span>
+  466 <span class="sd">        dict: A dictionary containing list of residue names and dictionaries of</span>
+  467 <span class="sd">            residue numbers and residue count for each residue. Names of </span>
+  468 <span class="sd">            residues in the dictionary are not sorted.</span>
+  469 
+  470 <span class="sd">    Examples:</span>
+  471 
+  472 <span class="sd">        ResiduesInfo = GetPocketSolventResiduesInfo(MolName, ChainName)</span>
+  473 <span class="sd">        for ResName in ResiduesInfo[&quot;ResNames&quot;]:</span>
+  474 <span class="sd">            ResCount = ResiduesInfo[&quot;ResCount&quot;][ResName]</span>
+  475 <span class="sd">            ResNums = ResiduesInfo[&quot;ResNum&quot;][ResName]</span>
+  476 <span class="sd">            MiscUtil.PrintInfo(&quot;ResName: %s; ResCount: %s; ResNums: %s&quot; %</span>
+  477 <span class="sd">                (ResName, ResCount, ResNums))</span>
+  478 
+  479 <span class="sd">    &quot;&quot;&quot;</span>
+  480     <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">MoleculeName</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">ChainName</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">LigandResName</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">LigandResNum</span><span class="p">)):</span>
+  481         <span class="k">return</span> <span class="bp">None</span>
+  482 
+  483     <span class="n">LigandSelection</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">%s</span><span class="s2"> and chain </span><span class="si">%s</span><span class="s2"> and organic and resn </span><span class="si">%s</span><span class="s2"> and resi </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">MoleculeName</span><span class="p">,</span> <span class="n">ChainName</span><span class="p">,</span> <span class="n">LigandResName</span><span class="p">,</span> <span class="n">LigandResNum</span><span class="p">)</span>
+  484     <span class="n">MoleculeSelection</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">%s</span><span class="s2"> and chain </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">MoleculeName</span><span class="p">,</span> <span class="n">ChainName</span><span class="p">)</span>
+  485     <span class="n">SelectionCmd</span> <span class="o">=</span> <span class="s2">&quot;((byresidue (</span><span class="si">%s</span><span class="s2">) within </span><span class="si">%.1f</span><span class="s2"> of (</span><span class="si">%s</span><span class="s2">))  and solvent)&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">MoleculeSelection</span><span class="p">,</span> <span class="n">PocketDistanceCutoff</span><span class="p">,</span> <span class="n">LigandSelection</span><span class="p">)</span>
+  486 
+  487     <span class="n">ResiduesInfoMap</span> <span class="o">=</span> <span class="n">_GetSelectionResiduesInfo</span><span class="p">(</span><span class="n">SelectionCmd</span><span class="p">)</span>
+  488 
+  489     <span class="k">return</span> <span class="n">ResiduesInfoMap</span>
+  490 
+  491 <span class="k">def</span> <span class="nf">GetPocketInorganicResiduesInfo</span><span class="p">(</span><span class="n">MoleculeName</span><span class="p">,</span> <span class="n">ChainName</span><span class="p">,</span> <span class="n">LigandResName</span><span class="p">,</span> <span class="n">LigandResNum</span><span class="p">,</span> <span class="n">PocketDistanceCutoff</span><span class="p">):</span>
+  492     <span class="sd">&quot;&quot;&quot;Get information for inorganic residues present in a pocket around a</span>
+  493 <span class="sd">    ligand in a molecule. Inorganic residues are identified using PyMOL</span>
+  494 <span class="sd">    &#39;inorganic&#39; selection.</span>
+  495 
+  496 <span class="sd">    Arguments:</span>
+  497 <span class="sd">        MoleculeName (str): Name of a PyMOL molecule object.</span>
+  498 <span class="sd">        ChainName (str): Name of a chain in a molecule.</span>
+  499 <span class="sd">        LigandResName (str): Residue name of a ligand in a chain.</span>
+  500 <span class="sd">        LigandResNum (str): Residue number of a ligand in a chain.</span>
+  501 <span class="sd">        PocketDistanceCutoff (float): Distance around a ligand to identify</span>
+  502 <span class="sd">            pocket residues.</span>
+  503 
+  504 <span class="sd">    Returns:</span>
+  505 <span class="sd">        dict: A dictionary containing list of residue names and dictionaries of</span>
+  506 <span class="sd">            residue numbers and residue count for each residue. Names of </span>
+  507 <span class="sd">            residues in the dictionary are not sorted.</span>
+  508 
+  509 <span class="sd">    Examples:</span>
+  510 
+  511 <span class="sd">        ResiduesInfo = GetPocketInorganicResiduesInfo(MolName, ChainName)</span>
+  512 <span class="sd">        for ResName in ResiduesInfo[&quot;ResNames&quot;]:</span>
+  513 <span class="sd">            ResCount = ResiduesInfo[&quot;ResCount&quot;][ResName]</span>
+  514 <span class="sd">            ResNums = ResiduesInfo[&quot;ResNum&quot;][ResName]</span>
+  515 <span class="sd">            MiscUtil.PrintInfo(&quot;ResName: %s; ResCount: %s; ResNums: %s&quot; %</span>
+  516 <span class="sd">                (ResName, ResCount, ResNums))</span>
+  517 
+  518 <span class="sd">    &quot;&quot;&quot;</span>
+  519     <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">MoleculeName</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">ChainName</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">LigandResName</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">LigandResNum</span><span class="p">)):</span>
+  520         <span class="k">return</span> <span class="bp">None</span>
+  521 
+  522     <span class="n">LigandSelection</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">%s</span><span class="s2"> and chain </span><span class="si">%s</span><span class="s2"> and organic and resn </span><span class="si">%s</span><span class="s2"> and resi </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">MoleculeName</span><span class="p">,</span> <span class="n">ChainName</span><span class="p">,</span> <span class="n">LigandResName</span><span class="p">,</span> <span class="n">LigandResNum</span><span class="p">)</span>
+  523     <span class="n">MoleculeSelection</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">%s</span><span class="s2"> and chain </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">MoleculeName</span><span class="p">,</span> <span class="n">ChainName</span><span class="p">)</span>
+  524     <span class="n">SelectionCmd</span> <span class="o">=</span> <span class="s2">&quot;((byresidue (</span><span class="si">%s</span><span class="s2">) within </span><span class="si">%.1f</span><span class="s2"> of (</span><span class="si">%s</span><span class="s2">))  and inorganic)&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">MoleculeSelection</span><span class="p">,</span> <span class="n">PocketDistanceCutoff</span><span class="p">,</span> <span class="n">LigandSelection</span><span class="p">)</span>
+  525 
+  526     <span class="n">ResiduesInfoMap</span> <span class="o">=</span> <span class="n">_GetSelectionResiduesInfo</span><span class="p">(</span><span class="n">SelectionCmd</span><span class="p">)</span>
+  527 
+  528     <span class="k">return</span> <span class="n">ResiduesInfoMap</span>
+  529 
+  530 <span class="k">def</span> <span class="nf">_GetSelectionResiduesInfo</span><span class="p">(</span><span class="n">SelectionCmd</span><span class="p">):</span>
+  531     <span class="sd">&quot;&quot;&quot;Get residue names and count information for a selection. &quot;&quot;&quot;</span>
+  532     
+  533     <span class="c1"># Retrieve atoms...</span>
+  534     <span class="n">stored</span><span class="o">.</span><span class="n">SelectionInfo</span> <span class="o">=</span> <span class="p">[]</span>
+  535     <span class="n">cmd</span><span class="o">.</span><span class="n">iterate</span><span class="p">(</span><span class="n">SelectionCmd</span><span class="p">,</span> <span class="s2">&quot;stored.SelectionInfo.append([resi, resn])&quot;</span><span class="p">)</span>
+  536 
+  537     <span class="c1"># Retrieve residues...</span>
+  538     <span class="n">SelectionInfoMap</span> <span class="o">=</span> <span class="p">{}</span>
+  539     <span class="n">SelectionInfoMap</span><span class="p">[</span><span class="s2">&quot;ResNames&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+  540     <span class="n">SelectionInfoMap</span><span class="p">[</span><span class="s2">&quot;ResNum&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+  541     <span class="n">SelectionInfoMap</span><span class="p">[</span><span class="s2">&quot;ResCount&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+  542 
+  543     <span class="n">PreviousResNum</span> <span class="o">=</span> <span class="mi">0</span>
+  544     <span class="k">for</span> <span class="n">ResNum</span><span class="p">,</span> <span class="n">ResName</span> <span class="ow">in</span> <span class="n">stored</span><span class="o">.</span><span class="n">SelectionInfo</span><span class="p">:</span>
+  545         <span class="k">if</span> <span class="n">ResName</span> <span class="ow">in</span> <span class="n">SelectionInfoMap</span><span class="p">[</span><span class="s2">&quot;ResNames&quot;</span><span class="p">]:</span>
+  546             <span class="k">if</span> <span class="n">ResNum</span> <span class="o">!=</span> <span class="n">PreviousResNum</span><span class="p">:</span>
+  547                 <span class="c1"># Same residue name but different residue number</span>
+  548                 <span class="n">SelectionInfoMap</span><span class="p">[</span><span class="s2">&quot;ResNum&quot;</span><span class="p">][</span><span class="n">ResName</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ResNum</span><span class="p">)</span>
+  549                 <span class="n">PreviousResNum</span> <span class="o">=</span> <span class="n">ResNum</span>
+  550                 
+  551                 <span class="n">SelectionInfoMap</span><span class="p">[</span><span class="s2">&quot;ResCount&quot;</span><span class="p">][</span><span class="n">ResName</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+  552         <span class="k">else</span><span class="p">:</span>
+  553             <span class="n">SelectionInfoMap</span><span class="p">[</span><span class="s2">&quot;ResNames&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ResName</span><span class="p">)</span>
+  554             
+  555             <span class="n">SelectionInfoMap</span><span class="p">[</span><span class="s2">&quot;ResNum&quot;</span><span class="p">][</span><span class="n">ResName</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+  556             <span class="n">SelectionInfoMap</span><span class="p">[</span><span class="s2">&quot;ResNum&quot;</span><span class="p">][</span><span class="n">ResName</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ResNum</span><span class="p">)</span>
+  557             <span class="n">PreviousResNum</span> <span class="o">=</span> <span class="n">ResNum</span>
+  558             
+  559             <span class="n">SelectionInfoMap</span><span class="p">[</span><span class="s2">&quot;ResCount&quot;</span><span class="p">][</span><span class="n">ResName</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+  560                 
+  561     <span class="k">return</span> <span class="n">SelectionInfoMap</span>
+  562 
+  563 <span class="k">def</span> <span class="nf">ProcessChainsAndLigandsOptionsInfo</span><span class="p">(</span><span class="n">ChainsAndLigandsInfo</span><span class="p">,</span> <span class="n">ChainsOptionName</span><span class="p">,</span> <span class="n">ChainsOptionValue</span><span class="p">,</span> <span class="n">LigandsOptionName</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">LigandsOptionValue</span> <span class="o">=</span> <span class="bp">None</span><span class="p">):</span>
+  564     <span class="sd">&quot;&quot;&quot;Process specified chain and ligand IDs using command line options.</span>
+  565 
+  566 <span class="sd">    Arguments:</span>
+  567 <span class="sd">        ChainsAndLigandsInfo (dict): A dictionary containing information</span>
+  568 <span class="sd">            existing chains and ligands. </span>
+  569 <span class="sd">        ChainsOptionName (str): Name of command line chains option.</span>
+  570 <span class="sd">        ChainsOptionValue (str): Value for command line chains option.</span>
+  571 <span class="sd">        LigandsOptionName (str): Name of command line ligands option.</span>
+  572 <span class="sd">        LigandsOptionValue (str): Value for command line ligands option.</span>
+  573 
+  574 <span class="sd">    Returns:</span>
+  575 <span class="sd">        dict: A dictionary containing list of chain identifiers and dictionaries</span>
+  576 <span class="sd">            of chains containing lists of ligand names for each chain.</span>
+  577 
+  578 <span class="sd">    Examples:</span>
+  579 
+  580 <span class="sd">        ChainsAndLigandsInfo = ProcessChainsAndLigandsOptionsInfo(Infile,</span>
+  581 <span class="sd">            MolName)</span>
+  582 <span class="sd">        for ChainID in ChainsAndLigandsInfo[&quot;ChainIDs&quot;]:</span>
+  583 <span class="sd">            for LigandID in ChainsAndLigandsInfo[&quot;LigandIDs&quot;][ChainID]:</span>
+  584 <span class="sd">                MiscUtil.PrintInfo(&quot;ChainID: %s; LigandID: %s&quot; % (ChainID,</span>
+  585 <span class="sd">                    LigandID))</span>
+  586 
+  587 <span class="sd">    &quot;&quot;&quot;</span>
+  588     <span class="n">SpecifiedChainsAndLigandsInfo</span> <span class="o">=</span> <span class="p">{}</span>
+  589     <span class="n">SpecifiedChainsAndLigandsInfo</span><span class="p">[</span><span class="s2">&quot;ChainIDs&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+  590     <span class="n">SpecifiedChainsAndLigandsInfo</span><span class="p">[</span><span class="s2">&quot;LigandIDs&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+  591 
+  592     <span class="k">if</span> <span class="n">ChainsOptionValue</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+  593         <span class="k">return</span> <span class="n">SpecifiedChainsAndLigandsInfo</span>
+  594         
+  595     <span class="n">_ProcessChainIDs</span><span class="p">(</span><span class="n">ChainsAndLigandsInfo</span><span class="p">,</span> <span class="n">SpecifiedChainsAndLigandsInfo</span><span class="p">,</span> <span class="n">ChainsOptionName</span><span class="p">,</span> <span class="n">ChainsOptionValue</span><span class="p">)</span>
+  596 
+  597     <span class="k">if</span> <span class="n">LigandsOptionValue</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+  598         <span class="k">return</span> <span class="n">SpecifiedChainsAndLigandsInfo</span>
+  599     
+  600     <span class="n">_ProcessLigandIDs</span><span class="p">(</span><span class="n">ChainsAndLigandsInfo</span><span class="p">,</span> <span class="n">SpecifiedChainsAndLigandsInfo</span><span class="p">,</span> <span class="n">LigandsOptionName</span><span class="p">,</span> <span class="n">LigandsOptionValue</span><span class="p">)</span>
+  601     
+  602     <span class="k">return</span> <span class="n">SpecifiedChainsAndLigandsInfo</span>
+  603 
+  604 <span class="k">def</span> <span class="nf">_ProcessChainIDs</span><span class="p">(</span><span class="n">ChainsAndLigandsInfo</span><span class="p">,</span> <span class="n">SpecifiedChainsAndLigandsInfo</span><span class="p">,</span> <span class="n">ChainsOptionName</span><span class="p">,</span> <span class="n">ChainsOptionValue</span><span class="p">):</span>
+  605     <span class="sd">&quot;&quot;&quot;Process chain IDs&quot;&quot;&quot;</span>
+  606 
+  607     <span class="n">MiscUtil</span><span class="o">.</span><span class="n">PrintInfo</span><span class="p">(</span><span class="s2">&quot;Processing chain IDs...&quot;</span><span class="p">)</span>
+  608     
+  609     <span class="k">if</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="s2">&quot;^All$&quot;</span><span class="p">,</span> <span class="n">ChainsOptionValue</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">I</span><span class="p">):</span>
+  610         <span class="n">SpecifiedChainsAndLigandsInfo</span><span class="p">[</span><span class="s2">&quot;ChainIDs&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ChainsAndLigandsInfo</span><span class="p">[</span><span class="s2">&quot;ChainIDs&quot;</span><span class="p">]</span>
+  611         <span class="k">return</span>
+  612     <span class="k">elif</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="s2">&quot;^(First|Auto)$&quot;</span><span class="p">,</span> <span class="n">ChainsOptionValue</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">I</span><span class="p">):</span>
+  613         <span class="n">FirstChainID</span> <span class="o">=</span> <span class="n">ChainsAndLigandsInfo</span><span class="p">[</span><span class="s2">&quot;ChainIDs&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">ChainsAndLigandsInfo</span><span class="p">[</span><span class="s2">&quot;ChainIDs&quot;</span><span class="p">]))</span> <span class="k">else</span> <span class="bp">None</span>
+  614         <span class="k">if</span> <span class="n">FirstChainID</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+  615             <span class="n">SpecifiedChainsAndLigandsInfo</span><span class="p">[</span><span class="s2">&quot;ChainIDs&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">FirstChainID</span><span class="p">)</span>
+  616         <span class="k">return</span>
+  617     
+  618     <span class="n">ChainIDs</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">ChainsOptionValue</span><span class="p">)</span>
+  619     <span class="k">if</span> <span class="ow">not</span> <span class="n">ChainIDs</span><span class="p">:</span>
+  620         <span class="n">MiscUtil</span><span class="o">.</span><span class="n">PrintError</span><span class="p">(</span><span class="s2">&quot;No valid value specified using </span><span class="se">\&quot;</span><span class="si">%s</span><span class="se">\&quot;</span><span class="s2"> option.&quot;</span> <span class="o">%</span> <span class="n">ChainsOptionName</span><span class="p">)</span>
+  621 
+  622     <span class="n">ChainIDsList</span> <span class="o">=</span> <span class="n">ChainsAndLigandsInfo</span><span class="p">[</span><span class="s2">&quot;ChainIDs&quot;</span><span class="p">]</span>
+  623     <span class="n">SpecifiedChainIDsList</span> <span class="o">=</span> <span class="p">[]</span>
+  624     
+  625     <span class="n">ChainIDsWords</span> <span class="o">=</span> <span class="n">ChainIDs</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">)</span>
+  626     <span class="k">for</span> <span class="n">ChainID</span> <span class="ow">in</span> <span class="n">ChainIDsWords</span><span class="p">:</span>
+  627         <span class="k">if</span> <span class="ow">not</span> <span class="n">ChainID</span> <span class="ow">in</span> <span class="n">ChainIDsList</span><span class="p">:</span>
+  628             <span class="n">MiscUtil</span><span class="o">.</span><span class="n">PrintWarning</span><span class="p">(</span><span class="s2">&quot;The chain ID, </span><span class="si">%s</span><span class="s2">, specified using </span><span class="se">\&quot;</span><span class="si">%s</span><span class="se">\&quot;</span><span class="s2"> option is not valid. It&#39;ll be ignored. Valid chain IDs: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">ChainID</span><span class="p">,</span> <span class="n">ChainsOptionName</span><span class="p">,</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">ChainIDsList</span><span class="p">)))</span>
+  629             <span class="k">continue</span>
+  630         <span class="k">if</span> <span class="n">ChainID</span> <span class="ow">in</span> <span class="n">SpecifiedChainIDsList</span><span class="p">:</span>
+  631             <span class="n">MiscUtil</span><span class="o">.</span><span class="n">PrintWarning</span><span class="p">(</span><span class="s2">&quot;The chain ID, </span><span class="si">%s</span><span class="s2">, has already been specified using </span><span class="se">\&quot;</span><span class="si">%s</span><span class="se">\&quot;</span><span class="s2"> option. It&#39;ll be ignored.&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">ChainID</span><span class="p">,</span> <span class="n">ChainsOptionName</span><span class="p">))</span>
+  632             <span class="k">continue</span>
+  633         <span class="n">SpecifiedChainIDsList</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ChainID</span><span class="p">)</span>
+  634     
+  635     <span class="k">if</span> <span class="ow">not</span> <span class="nb">len</span><span class="p">(</span><span class="n">SpecifiedChainIDsList</span><span class="p">):</span>
+  636         <span class="n">MiscUtil</span><span class="o">.</span><span class="n">PrintError</span><span class="p">(</span><span class="s2">&quot;No valid chain IDs </span><span class="se">\&quot;</span><span class="si">%s</span><span class="se">\&quot;</span><span class="s2">  specified using </span><span class="se">\&quot;</span><span class="si">%s</span><span class="se">\&quot;</span><span class="s2"> option.&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">ChainsOptionValue</span><span class="p">,</span> <span class="n">ChainsOptionName</span><span class="p">))</span>
+  637     
+  638     <span class="n">SpecifiedChainsAndLigandsInfo</span><span class="p">[</span><span class="s2">&quot;ChainIDs&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">SpecifiedChainIDsList</span>
+  639     
+  640 <span class="k">def</span> <span class="nf">_ProcessLigandIDs</span><span class="p">(</span><span class="n">ChainsAndLigandsInfo</span><span class="p">,</span> <span class="n">SpecifiedChainsAndLigandsInfo</span><span class="p">,</span> <span class="n">LigandsOptionName</span><span class="p">,</span> <span class="n">LigandsOptionValue</span><span class="p">):</span>
+  641     <span class="sd">&quot;&quot;&quot;Process ligand IDs&quot;&quot;&quot;</span>
+  642 
+  643     <span class="n">MiscUtil</span><span class="o">.</span><span class="n">PrintInfo</span><span class="p">(</span><span class="s2">&quot;Processing ligand IDs...&quot;</span><span class="p">)</span>
+  644     
+  645     <span class="c1"># Intialize ligand IDs...</span>
+  646     <span class="k">for</span> <span class="n">ChainID</span> <span class="ow">in</span> <span class="n">SpecifiedChainsAndLigandsInfo</span><span class="p">[</span><span class="s2">&quot;ChainIDs&quot;</span><span class="p">]</span> <span class="p">:</span>
+  647         <span class="n">SpecifiedChainsAndLigandsInfo</span><span class="p">[</span><span class="s2">&quot;LigandIDs&quot;</span><span class="p">][</span><span class="n">ChainID</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+  648         
+  649     <span class="k">if</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="s2">&quot;^All$&quot;</span><span class="p">,</span> <span class="n">LigandsOptionValue</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">I</span><span class="p">):</span>
+  650         <span class="k">for</span> <span class="n">ChainID</span> <span class="ow">in</span> <span class="n">SpecifiedChainsAndLigandsInfo</span><span class="p">[</span><span class="s2">&quot;ChainIDs&quot;</span><span class="p">]</span> <span class="p">:</span>
+  651             <span class="n">SpecifiedChainsAndLigandsInfo</span><span class="p">[</span><span class="s2">&quot;LigandIDs&quot;</span><span class="p">][</span><span class="n">ChainID</span><span class="p">]</span> <span class="o">=</span> <span class="n">ChainsAndLigandsInfo</span><span class="p">[</span><span class="s2">&quot;LigandIDs&quot;</span><span class="p">][</span><span class="n">ChainID</span><span class="p">]</span>
+  652         <span class="k">return</span>
+  653     <span class="k">elif</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="s2">&quot;^(Largest|Auto)$&quot;</span><span class="p">,</span> <span class="n">LigandsOptionValue</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">I</span><span class="p">):</span>
+  654         <span class="c1"># Setup largest ligand ID for each chain...</span>
+  655         <span class="k">for</span> <span class="n">ChainID</span> <span class="ow">in</span> <span class="n">SpecifiedChainsAndLigandsInfo</span><span class="p">[</span><span class="s2">&quot;ChainIDs&quot;</span><span class="p">]</span> <span class="p">:</span>
+  656             <span class="n">LargestLigandID</span> <span class="o">=</span> <span class="n">ChainsAndLigandsInfo</span><span class="p">[</span><span class="s2">&quot;LigandIDs&quot;</span><span class="p">][</span><span class="n">ChainID</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">ChainsAndLigandsInfo</span><span class="p">[</span><span class="s2">&quot;LigandIDs&quot;</span><span class="p">][</span><span class="n">ChainID</span><span class="p">]))</span> <span class="k">else</span> <span class="bp">None</span>
+  657             <span class="k">if</span> <span class="n">LargestLigandID</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+  658                 <span class="n">SpecifiedChainsAndLigandsInfo</span><span class="p">[</span><span class="s2">&quot;LigandIDs&quot;</span><span class="p">][</span><span class="n">ChainID</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">LargestLigandID</span><span class="p">)</span>
+  659         <span class="k">return</span>
+  660     
+  661     <span class="n">LigandIDs</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">LigandsOptionValue</span><span class="p">)</span>
+  662     <span class="k">if</span> <span class="ow">not</span> <span class="n">LigandIDs</span><span class="p">:</span>
+  663         <span class="n">MiscUtil</span><span class="o">.</span><span class="n">PrintError</span><span class="p">(</span><span class="s2">&quot;No valid value specified using </span><span class="se">\&quot;</span><span class="si">%s</span><span class="se">\&quot;</span><span class="s2"> option.&quot;</span> <span class="o">%</span> <span class="n">LigandsOptionName</span><span class="p">)</span>
+  664     
+  665     <span class="n">LigandIDsWords</span> <span class="o">=</span> <span class="n">LigandIDs</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">)</span>
+  666     
+  667     <span class="k">for</span> <span class="n">ChainID</span> <span class="ow">in</span> <span class="n">SpecifiedChainsAndLigandsInfo</span><span class="p">[</span><span class="s2">&quot;ChainIDs&quot;</span><span class="p">]:</span>
+  668         <span class="n">LigandIDsList</span> <span class="o">=</span> <span class="n">ChainsAndLigandsInfo</span><span class="p">[</span><span class="s2">&quot;LigandIDs&quot;</span><span class="p">][</span><span class="n">ChainID</span><span class="p">]</span>
+  669         <span class="n">SpecifiedLigandIDsList</span> <span class="o">=</span> <span class="p">[]</span>
+  670 
+  671         <span class="k">for</span> <span class="n">LigandID</span> <span class="ow">in</span> <span class="n">LigandIDsWords</span><span class="p">:</span>
+  672             <span class="k">if</span> <span class="ow">not</span> <span class="n">LigandID</span> <span class="ow">in</span> <span class="n">LigandIDsList</span><span class="p">:</span>
+  673                 <span class="n">LigandIDsListNames</span> <span class="o">=</span> <span class="s2">&quot;,&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">LigandIDsList</span><span class="p">)</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">LigandIDsList</span><span class="p">)</span> <span class="k">else</span> <span class="s2">&quot;None&quot;</span>
+  674                 <span class="n">MiscUtil</span><span class="o">.</span><span class="n">PrintWarning</span><span class="p">(</span><span class="s2">&quot;The ligand ID, </span><span class="si">%s</span><span class="s2">, specified using </span><span class="se">\&quot;</span><span class="si">%s</span><span class="se">\&quot;</span><span class="s2"> option is not valid for chain, </span><span class="si">%s</span><span class="s2">. It&#39;ll be ignored. Valid ligand IDs: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">LigandID</span><span class="p">,</span> <span class="n">LigandsOptionName</span><span class="p">,</span> <span class="n">ChainID</span><span class="p">,</span> <span class="n">LigandIDsListNames</span><span class="p">))</span>
+  675                 <span class="k">continue</span>
+  676             <span class="k">if</span> <span class="n">LigandID</span> <span class="ow">in</span> <span class="n">SpecifiedLigandIDsList</span><span class="p">:</span>
+  677                 <span class="n">MiscUtil</span><span class="o">.</span><span class="n">PrintWarning</span><span class="p">(</span><span class="s2">&quot;The ligand ID, </span><span class="si">%s</span><span class="s2">, has already been specified using </span><span class="se">\&quot;</span><span class="si">%s</span><span class="se">\&quot;</span><span class="s2"> option. It&#39;ll be ignored.&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">LigandID</span><span class="p">,</span> <span class="n">LigandsOptionName</span><span class="p">))</span>
+  678                 <span class="k">continue</span>
+  679             <span class="n">SpecifiedLigandIDsList</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">LigandID</span><span class="p">)</span>
+  680             
+  681         <span class="k">if</span> <span class="ow">not</span> <span class="nb">len</span><span class="p">(</span><span class="n">SpecifiedLigandIDsList</span><span class="p">):</span>
+  682             <span class="n">MiscUtil</span><span class="o">.</span><span class="n">PrintWarning</span><span class="p">(</span><span class="s2">&quot;No valid ligand IDs </span><span class="se">\&quot;</span><span class="si">%s</span><span class="se">\&quot;</span><span class="s2"> specified using </span><span class="se">\&quot;</span><span class="si">%s</span><span class="se">\&quot;</span><span class="s2"> option for chain ID, </span><span class="si">%s</span><span class="s2">.&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">LigandsOptionValue</span><span class="p">,</span> <span class="n">LigandsOptionName</span><span class="p">,</span> <span class="n">ChainID</span><span class="p">))</span>
+  683         
+  684         <span class="n">SpecifiedChainsAndLigandsInfo</span><span class="p">[</span><span class="s2">&quot;LigandIDs&quot;</span><span class="p">][</span><span class="n">ChainID</span><span class="p">]</span> <span class="o">=</span> <span class="n">SpecifiedLigandIDsList</span>
+  685     
+  686 <span class="k">def</span> <span class="nf">CalculateCenterOfMass</span><span class="p">(</span><span class="n">Selection</span> <span class="o">=</span> <span class="s2">&quot;all&quot;</span><span class="p">,</span> <span class="n">Quiet</span> <span class="o">=</span> <span class="mi">0</span><span class="p">):</span>
+  687     <span class="sd">&quot;&quot;&quot;Calculate center of mass for a selection.</span>
+  688 
+  689 <span class="sd">    Arguments:</span>
+  690 <span class="sd">        Selection (str): A PyMOL selection.</span>
+  691 <span class="sd">        Quiet (int): Print information.</span>
+  692 
+  693 <span class="sd">    Returns:</span>
+  694 <span class="sd">        list: X, Y, Z coordinates for center of mass.</span>
+  695 
+  696 <span class="sd">    &quot;&quot;&quot;</span>
+  697     <span class="n">MassTotal</span> <span class="o">=</span> <span class="mf">0.0</span>
+  698     <span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">,</span> <span class="n">Z</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">]</span>
+  699     
+  700     <span class="n">Atoms</span> <span class="o">=</span> <span class="n">cmd</span><span class="o">.</span><span class="n">get_model</span><span class="p">(</span><span class="n">Selection</span><span class="p">)</span>
+  701     <span class="k">for</span> <span class="n">Atom</span> <span class="ow">in</span> <span class="n">Atoms</span><span class="o">.</span><span class="n">atom</span><span class="p">:</span>
+  702         <span class="n">Mass</span> <span class="o">=</span> <span class="n">Atom</span><span class="o">.</span><span class="n">get_mass</span><span class="p">()</span>
+  703         <span class="n">MassTotal</span> <span class="o">+=</span> <span class="n">Mass</span>
+  704 
+  705         <span class="n">X</span> <span class="o">+=</span> <span class="n">Atom</span><span class="o">.</span><span class="n">coord</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">Mass</span>
+  706         <span class="n">Y</span> <span class="o">+=</span> <span class="n">Atom</span><span class="o">.</span><span class="n">coord</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">Mass</span>
+  707         <span class="n">Z</span> <span class="o">+=</span> <span class="n">Atom</span><span class="o">.</span><span class="n">coord</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">*</span> <span class="n">Mass</span>
+  708 
+  709     <span class="n">XCOM</span> <span class="o">=</span> <span class="n">X</span><span class="o">/</span><span class="n">MassTotal</span>
+  710     <span class="n">YCOM</span> <span class="o">=</span> <span class="n">Y</span><span class="o">/</span><span class="n">MassTotal</span>
+  711     <span class="n">ZCOM</span> <span class="o">=</span> <span class="n">Z</span><span class="o">/</span><span class="n">MassTotal</span>
+  712 
+  713     <span class="k">if</span> <span class="ow">not</span> <span class="n">Quiet</span><span class="p">:</span>
+  714         <span class="n">MiscUtil</span><span class="o">.</span><span class="n">PrintInfo</span><span class="p">(</span><span class="s2">&quot;PyMOLUtil.CalculateCenterOfMass: </span><span class="si">%f</span><span class="s2">, </span><span class="si">%f</span><span class="s2">, </span><span class="si">%f</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">XCOM</span><span class="p">,</span> <span class="n">YCOM</span><span class="p">,</span> <span class="n">ZCOM</span><span class="p">))</span>
+  715     
+  716     <span class="k">return</span> <span class="p">[</span><span class="n">XCOM</span><span class="p">,</span> <span class="n">YCOM</span><span class="p">,</span> <span class="n">ZCOM</span><span class="p">]</span>
+  717 
+  718 <span class="k">def</span> <span class="nf">ConvertFileFormat</span><span class="p">(</span><span class="n">Infile</span><span class="p">,</span> <span class="n">Outfile</span><span class="p">,</span> <span class="n">Reinitialize</span> <span class="o">=</span> <span class="bp">True</span><span class="p">,</span> <span class="n">OutputFeedback</span> <span class="o">=</span> <span class="bp">True</span><span class="p">):</span>
+  719     <span class="sd">&quot;&quot;&quot;Convert infile to outfile by automatically detecting their formats</span>
+  720 <span class="sd">    from the file extensions.</span>
+  721 
+  722 <span class="sd">    The formats of both input and output files must be a valid format supported</span>
+  723 <span class="sd">    by PyMOL.</span>
+  724 
+  725 <span class="sd">    Arguments:</span>
+  726 <span class="sd">        Infile (str): Name of input file.</span>
+  727 <span class="sd">        Outfile (str): Name of outfile file.</span>
+  728 <span class="sd">        Reinitialize (bool): Reinitialize PyMOL before loading input file.</span>
+  729 <span class="sd">        OutputFeedback (bool): Control output feedback.</span>
+  730 
+  731 <span class="sd">    &quot;&quot;&quot;</span>
+  732     
+  733     <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">Infile</span><span class="p">):</span>
+  734         <span class="n">MiscUtil</span><span class="o">.</span><span class="n">PrintWarning</span><span class="p">(</span><span class="s2">&quot;The input file, </span><span class="si">%s</span><span class="s2">, doesn&#39;t exists.</span><span class="si">%s</span><span class="s2">...&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">Infile</span><span class="p">))</span>
+  735 
+  736     <span class="k">if</span> <span class="n">Reinitialize</span><span class="p">:</span>
+  737         <span class="n">cmd</span><span class="o">.</span><span class="n">reinitialize</span><span class="p">()</span>
+  738 
+  739     <span class="k">if</span> <span class="ow">not</span> <span class="n">OutputFeedback</span><span class="p">:</span>
+  740         <span class="c1"># Turn off output feedback...</span>
+  741         <span class="n">MiscUtil</span><span class="o">.</span><span class="n">PrintInfo</span><span class="p">(</span><span class="s2">&quot;Disabling output feedback for PyMOL...&quot;</span><span class="p">)</span>
+  742         <span class="n">cmd</span><span class="o">.</span><span class="n">feedback</span><span class="p">(</span><span class="s2">&quot;disable&quot;</span><span class="p">,</span> <span class="s2">&quot;all&quot;</span><span class="p">,</span> <span class="s2">&quot;output&quot;</span><span class="p">)</span>
+  743 
+  744     <span class="n">FileDir</span><span class="p">,</span> <span class="n">FileName</span><span class="p">,</span> <span class="n">FileExt</span> <span class="o">=</span> <span class="n">MiscUtil</span><span class="o">.</span><span class="n">ParseFileName</span><span class="p">(</span><span class="n">Infile</span><span class="p">)</span>
+  745     <span class="n">MolName</span> <span class="o">=</span> <span class="n">FileName</span>
+  746     
+  747     <span class="n">cmd</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">Infile</span><span class="p">,</span> <span class="n">MolName</span><span class="p">)</span>
+  748     <span class="n">cmd</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">Outfile</span><span class="p">,</span> <span class="n">MolName</span><span class="p">)</span>
+  749     <span class="n">cmd</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="n">MolName</span><span class="p">)</span>
+  750     
+  751     <span class="k">if</span> <span class="ow">not</span> <span class="n">OutputFeedback</span><span class="p">:</span>
+  752         <span class="c1"># Turn it back on...</span>
+  753         <span class="n">MiscUtil</span><span class="o">.</span><span class="n">PrintInfo</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Enabling output feedback for PyMOL...&quot;</span><span class="p">)</span>
+  754         <span class="n">cmd</span><span class="o">.</span><span class="n">feedback</span><span class="p">(</span><span class="s2">&quot;enable&quot;</span><span class="p">,</span> <span class="s2">&quot;all&quot;</span><span class="p">,</span> <span class="s2">&quot;output&quot;</span><span class="p">)</span>
+  755 
+  756 <span class="k">def</span> <span class="nf">ConvertPMLFileToPSEFile</span><span class="p">(</span><span class="n">PMLFile</span><span class="p">,</span> <span class="n">PSEFile</span><span class="p">,</span> <span class="n">Reinitialize</span> <span class="o">=</span> <span class="bp">True</span><span class="p">,</span> <span class="n">OutputFeedback</span> <span class="o">=</span> <span class="bp">True</span><span class="p">):</span>
+  757     <span class="sd">&quot;&quot;&quot;Convert PML file to PME file.</span>
+  758 
+  759 <span class="sd">    Arguments:</span>
+  760 <span class="sd">        PMLFile (str): Name of PML file.</span>
+  761 <span class="sd">        PSEFile (str): Name of PSE file.</span>
+  762 <span class="sd">        Reinitialize (bool): Reinitialize PyMOL before loading PML file.</span>
+  763 <span class="sd">        OutputFeedback (bool): Control output feedback.</span>
+  764 
+  765 <span class="sd">    &quot;&quot;&quot;</span>
+  766     
+  767     <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">PMLFile</span><span class="p">):</span>
+  768         <span class="n">MiscUtil</span><span class="o">.</span><span class="n">PrintWarning</span><span class="p">(</span><span class="s2">&quot;The PML file, </span><span class="si">%s</span><span class="s2">, doesn&#39;t exists.</span><span class="si">%s</span><span class="s2">...&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">PMLFile</span><span class="p">))</span>
+  769 
+  770     <span class="k">if</span> <span class="n">Reinitialize</span><span class="p">:</span>
+  771         <span class="n">cmd</span><span class="o">.</span><span class="n">reinitialize</span><span class="p">()</span>
+  772 
+  773     <span class="k">if</span> <span class="ow">not</span> <span class="n">OutputFeedback</span><span class="p">:</span>
+  774         <span class="c1"># Turn off output feedback...</span>
+  775         <span class="n">MiscUtil</span><span class="o">.</span><span class="n">PrintInfo</span><span class="p">(</span><span class="s2">&quot;Disabling output feedback for PyMOL...&quot;</span><span class="p">)</span>
+  776         <span class="n">cmd</span><span class="o">.</span><span class="n">feedback</span><span class="p">(</span><span class="s2">&quot;disable&quot;</span><span class="p">,</span> <span class="s2">&quot;all&quot;</span><span class="p">,</span> <span class="s2">&quot;output&quot;</span><span class="p">)</span>
+  777 
+  778     <span class="n">cmd</span><span class="o">.</span><span class="n">do</span><span class="p">(</span><span class="s2">&quot;@</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">PMLFile</span><span class="p">)</span>
+  779     <span class="n">cmd</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">PSEFile</span><span class="p">)</span>
+  780     
+  781     <span class="k">if</span> <span class="ow">not</span> <span class="n">OutputFeedback</span><span class="p">:</span>
+  782         <span class="c1"># Turn it back on...</span>
+  783         <span class="n">MiscUtil</span><span class="o">.</span><span class="n">PrintInfo</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Enabling output feedback for PyMOL...&quot;</span><span class="p">)</span>
+  784         <span class="n">cmd</span><span class="o">.</span><span class="n">feedback</span><span class="p">(</span><span class="s2">&quot;enable&quot;</span><span class="p">,</span> <span class="s2">&quot;all&quot;</span><span class="p">,</span> <span class="s2">&quot;output&quot;</span><span class="p">)</span>
+  785 
+  786 <span class="k">def</span> <span class="nf">SetupPMLHeaderInfo</span><span class="p">(</span><span class="n">ScriptName</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">IncludeLocalPython</span> <span class="o">=</span> <span class="bp">True</span><span class="p">):</span>
+  787     <span class="sd">&quot;&quot;&quot;Setup header information for generating PML files. The local Python</span>
+  788 <span class="sd">    functions are optionally embedded in the header information for their</span>
+  789 <span class="sd">    usage in PML files.</span>
+  790 
+  791 <span class="sd">    Arguments:</span>
+  792 <span class="sd">        ScriptName (str): Name of script calling the function.</span>
+  793 <span class="sd">        IncludeLocalPython (bool): Include local Python functions.</span>
+  794 
+  795 <span class="sd">    Returns:</span>
+  796 <span class="sd">        str: Text containing header information for generating PML files.</span>
+  797 
+  798 <span class="sd">    &quot;&quot;&quot;</span>
+  799     <span class="k">if</span> <span class="n">ScriptName</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+  800         <span class="n">HeaderInfo</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span><span class="se">\</span>
+  801 <span class="s2">#</span>
+  802 <span class="s2"># This file is automatically generated by a script available in MayaChemTools.</span>
+  803 <span class="s2">#</span>
+  804 <span class="s2">cmd.reinitialize()&quot;&quot;&quot;</span>
+  805     <span class="k">else</span><span class="p">:</span>
+  806         <span class="n">HeaderInfo</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span><span class="se">\</span>
+  807 <span class="s2">#</span>
+  808 <span class="s2"># This file is automatically generated by the following PyMOL script available in</span>
+  809 <span class="s2"># MayaChemTools: </span><span class="si">%s</span><span class="s2"></span>
+  810 <span class="s2">#</span>
+  811 <span class="s2">cmd.reinitialize() &quot;&quot;&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">ScriptName</span><span class="p">)</span>
+  812 
+  813     <span class="k">if</span> <span class="n">IncludeLocalPython</span><span class="p">:</span>
+  814         <span class="n">PMLForLocalPython</span> <span class="o">=</span> <span class="n">_SetupPMLForLocalPython</span><span class="p">()</span>
+  815         <span class="n">HeaderInfo</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">%s</span><span class="se">\n\n</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">HeaderInfo</span><span class="p">,</span> <span class="n">PMLForLocalPython</span><span class="p">)</span>
+  816     
+  817     <span class="k">return</span> <span class="n">HeaderInfo</span>
+  818 
+  819 <span class="k">def</span> <span class="nf">_SetupPMLForLocalPython</span><span class="p">():</span>
+  820     <span class="sd">&quot;&quot;&quot;Setup local Python functions for PML file.</span>
+  821 <span class="sd">    &quot;&quot;&quot;</span>
+  822     
+  823     <span class="n">PMLForPython</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span><span class="se">\</span>
+  824 <span class="s2">&quot;&quot;</span>
+  825 <span class="s2">&quot;Setting up local Python functions  for PML script...&quot;</span>
+  826 <span class="s2">&quot;&quot;</span>
+  827 <span class="s2">python</span>
+  828 
+  829 <span class="s2">from __future__ import print_function</span>
+  830 <span class="s2">import re</span>
+  831 
+  832 <span class="s2">def ColorByHydrophobicity(Selection, ColorPalette = &quot;RedToWhite&quot;):</span>
+  833 <span class="s2">        </span><span class="se">\&quot;</span><span class="s2">&quot;&quot;Color by hydrophobicity using hydrophobic values for amino acids</span>
+  834 <span class="s2">        corresponding to the Eisenberg hydrophobicity scale.</span>
+  835 
+  836 <span class="s2">        Possible values for ColorPalette: RedToWhite or WhiteToGreen from most</span>
+  837 <span class="s2">        hydrophobic amino acid to least hydrophobic.</span>
+  838 
+  839 <span class="s2">        The colors values for amino acids are taken from color_h script avaiable</span>
+  840 <span class="s2">        as part of the Script Library at PyMOL Wiki. </span>
+  841 <span class="s2">        </span>
+  842 <span class="s2">        </span><span class="se">\&quot;</span><span class="s2">&quot;&quot;</span>
+  843 <span class="s2">        </span>
+  844 <span class="s2">        if not re.match(&quot;^(RedToWhite|WhiteToGreen)$&quot;, ColorPalette, re.I):</span>
+  845 <span class="s2">                print(&quot;Invalid ColorPalette value: </span><span class="si">%s</span><span class="s2">. Valid values: RedToWhite, WhiteToGreen&quot; % ColorPalette)</span>
+  846 
+  847 <span class="s2">        ResColors = {}</span>
+  848 <span class="s2">        ColorType = &quot;&quot;</span>
+  849 <span class="s2">        ColorsAvailable = True</span>
+  850 <span class="s2">        </span>
+  851 <span class="s2">        if re.match(&quot;^WhiteToGreen$&quot;, ColorPalette, re.I):</span>
+  852 <span class="s2">                ColorType = &quot;H2&quot;</span>
+  853 <span class="s2">                ResColors = {&quot;ile&quot; : [0.938,1,0.938], &quot;phe&quot; : [0.891,1,0.891], &quot;val&quot; : [0.844,1,0.844], &quot;leu&quot; : [0.793,1,0.793], &quot;trp&quot; : [0.746,1,0.746], &quot;met&quot; : [0.699,1,0.699], &quot;ala&quot; : [0.652,1,0.652], &quot;gly&quot; : [0.606,1,0.606], &quot;cys&quot; : [0.555,1,0.555], &quot;tyr&quot; : [0.508,1,0.508], &quot;pro&quot; : [0.461,1,0.461], &quot;thr&quot; : [0.414,1,0.414], &quot;ser&quot; : [0.363,1,0.363], &quot;his&quot; : [0.316,1,0.316], &quot;glu&quot; : [0.27,1,0.27], &quot;asn&quot; : [0.223,1,0.223], &quot;gln&quot; : [0.176,1,0.176], &quot;asp&quot; : [0.125,1,0.125], &quot;lys&quot; : [0.078,1,0.078], &quot;arg&quot; : [0.031,1,0.031]}</span>
+  854 <span class="s2">        else:</span>
+  855 <span class="s2">                ColorType = &quot;H1&quot;</span>
+  856 <span class="s2">                ResColors = {&quot;ile&quot; : [0.996,0.062,0.062], &quot;phe&quot; : [0.996,0.109,0.109], &quot;val&quot; : [0.992,0.156,0.156], &quot;leu&quot; : [0.992,0.207,0.207], &quot;trp&quot; : [0.992,0.254,0.254], &quot;met&quot; : [0.988,0.301,0.301], &quot;ala&quot; : [0.988,0.348,0.348], &quot;gly&quot; : [0.984,0.394,0.394], &quot;cys&quot; : [0.984,0.445,0.445], &quot;tyr&quot; : [0.984,0.492,0.492], &quot;pro&quot; : [0.980,0.539,0.539], &quot;thr&quot; : [0.980,0.586,0.586], &quot;ser&quot; : [0.980,0.637,0.637], &quot;his&quot; : [0.977,0.684,0.684], &quot;glu&quot; : [0.977,0.730,0.730], &quot;asn&quot; : [0.973,0.777,0.777], &quot;gln&quot; : [0.973,0.824,0.824], &quot;asp&quot; : [0.973,0.875,0.875], &quot;lys&quot; : [0.899,0.922,0.922], &quot;arg&quot; : [0.899,0.969,0.969]}</span>
+  857 <span class="s2">        </span>
+  858 <span class="s2">        # Set up colors...</span>
+  859 <span class="s2">        for ResName in ResColors:</span>
+  860 <span class="s2">                ColorName = &quot;color_</span><span class="si">%s</span><span class="s2">_</span><span class="si">%s</span><span class="s2">&quot; % (ResName, ColorType)</span>
+  861 <span class="s2">                cmd.set_color(ColorName, ResColors[ResName])</span>
+  862 
+  863 <span class="s2">                ResSelection = &quot;(</span><span class="si">%s</span><span class="s2"> and resn </span><span class="si">%s</span><span class="s2">*)&quot; % (Selection, ResName)</span>
+  864 <span class="s2">                cmd.color(ColorName, ResSelection)</span>
+  865 <span class="s2">        </span>
+  866 <span class="s2">cmd.extend(&quot;ColorByHydrophobicity&quot;, ColorByHydrophobicity)</span>
+  867 
+  868 <span class="s2">def CheckAndDeleteEmptyObject(ObjectName, ParentObjectName = None):</span>
+  869 <span class="s2">    </span><span class="se">\&quot;</span><span class="s2">&quot;&quot;Delete an empty object along with optionally deleting its parent.</span>
+  870 <span class="s2">        </span>
+  871 <span class="s2">    </span><span class="se">\&quot;</span><span class="s2">&quot;&quot;</span>
+  872 <span class="s2">    </span>
+  873 <span class="s2">    if  cmd.count_atoms(&quot;(</span><span class="si">%s</span><span class="s2">)&quot; % ObjectName):</span>
+  874 <span class="s2">        return</span>
+  875 
+  876 <span class="s2">    cmd.delete(&quot;</span><span class="si">%s</span><span class="s2">&quot; % ObjectName)</span>
+  877 <span class="s2">    </span>
+  878 <span class="s2">    if ParentObjectName is not None:</span>
+  879 <span class="s2">        cmd.delete(&quot;</span><span class="si">%s</span><span class="s2">&quot; % ParentObjectName)</span>
+  880 <span class="s2">    </span>
+  881 <span class="s2">cmd.extend(&quot;CheckAndDeleteEmptyObject&quot;, CheckAndDeleteEmptyObject)</span>
+  882 
+  883 <span class="s2">python end&quot;&quot;&quot;</span>
+  884     
+  885     <span class="k">return</span> <span class="n">PMLForPython</span>
+  886 
+  887 <span class="k">def</span> <span class="nf">SetupPMLForEnableDisable</span><span class="p">(</span><span class="n">Name</span><span class="p">,</span> <span class="n">Enable</span> <span class="o">=</span> <span class="bp">True</span><span class="p">):</span>
+  888     <span class="sd">&quot;&quot;&quot;Setup PML command for enabling or disabling display of a PyMOL object.</span>
+  889 
+  890 <span class="sd">    Arguments:</span>
+  891 <span class="sd">        Name (str): Name of a PyMOL object.</span>
+  892 <span class="sd">        Enable (bool): Display status.</span>
+  893 
+  894 <span class="sd">    Returns:</span>
+  895 <span class="sd">        str: PML command for enabling or disabling display of an object.</span>
+  896 
+  897 <span class="sd">    &quot;&quot;&quot;</span>
+  898     
+  899     <span class="k">if</span> <span class="n">Enable</span><span class="p">:</span>
+  900         <span class="n">PML</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;cmd.enable(&quot;</span><span class="si">%s</span><span class="s2">&quot;)&quot;&quot;&quot;</span> <span class="o">%</span> <span class="n">Name</span>
+  901     <span class="k">else</span><span class="p">:</span>
+  902         <span class="n">PML</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;cmd.disable(&quot;</span><span class="si">%s</span><span class="s2">&quot;)&quot;&quot;&quot;</span> <span class="o">%</span> <span class="n">Name</span>
+  903         
+  904     <span class="k">return</span> <span class="n">PML</span>
+  905 
+  906 <span class="k">def</span> <span class="nf">SetupPMLForGroup</span><span class="p">(</span><span class="n">GroupName</span><span class="p">,</span> <span class="n">GroupMembersList</span><span class="p">,</span> <span class="n">Enable</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">Action</span> <span class="o">=</span> <span class="bp">None</span><span class="p">):</span>
+  907     <span class="sd">&quot;&quot;&quot;Setup PML commands for creating a group from a list of group members. The</span>
+  908 <span class="sd">    display and open status of the group may be optionally set. The &#39;None&#39; values</span>
+  909 <span class="sd">    for Enable and Action imply usage of PyMOL defaults for the creation of group.</span>
+  910 
+  911 <span class="sd">    Arguments:</span>
+  912 <span class="sd">        GroupName (str): Name of a PyMOL group.</span>
+  913 <span class="sd">        GroupMembersList (list): List of group member names.</span>
+  914 <span class="sd">        Enable (bool): Display status of group.</span>
+  915 <span class="sd">        Action (str): Open or close status of group object.</span>
+  916 
+  917 <span class="sd">    Returns:</span>
+  918 <span class="sd">        str: PML commands for creating a group object.</span>
+  919 
+  920 <span class="sd">    &quot;&quot;&quot;</span>
+  921 
+  922     <span class="n">PMLCmds</span> <span class="o">=</span> <span class="p">[]</span>
+  923     
+  924     <span class="n">GroupMembers</span> <span class="o">=</span> <span class="s2">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">GroupMembersList</span><span class="p">)</span>
+  925     <span class="n">PMLCmds</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;cmd.group(&quot;</span><span class="si">%s</span><span class="s2">&quot;, &quot;</span><span class="si">%s</span><span class="s2">&quot;)&quot;&quot;&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">GroupName</span><span class="p">,</span> <span class="n">GroupMembers</span><span class="p">))</span>
+  926     
+  927     <span class="k">if</span> <span class="n">Enable</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+  928         <span class="k">if</span> <span class="n">Enable</span><span class="p">:</span>
+  929             <span class="n">PMLCmds</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;cmd.enable(&quot;</span><span class="si">%s</span><span class="s2">&quot;)&quot;&quot;&quot;</span> <span class="o">%</span> <span class="n">GroupName</span><span class="p">)</span>
+  930         <span class="k">else</span><span class="p">:</span>
+  931             <span class="n">PMLCmds</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;cmd.disable(&quot;</span><span class="si">%s</span><span class="s2">&quot;)&quot;&quot;&quot;</span> <span class="o">%</span> <span class="n">GroupName</span><span class="p">)</span>
+  932     
+  933     <span class="k">if</span> <span class="n">Action</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+  934         <span class="n">PMLCmds</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;cmd.group(&quot;</span><span class="si">%s</span><span class="s2">&quot;, action=&quot;</span><span class="si">%s</span><span class="s2">&quot;)&quot;&quot;&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">GroupName</span><span class="p">,</span> <span class="n">Action</span><span class="p">))</span>
+  935 
+  936     <span class="n">PML</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">PMLCmds</span><span class="p">)</span>
+  937     
+  938     <span class="k">return</span> <span class="n">PML</span>
+  939 
+  940 <span class="k">def</span> <span class="nf">SetupPMLForLigandView</span><span class="p">(</span><span class="n">Name</span><span class="p">,</span> <span class="n">Selection</span><span class="p">,</span> <span class="n">LigandResName</span><span class="p">,</span> <span class="n">Enable</span> <span class="o">=</span> <span class="bp">True</span><span class="p">):</span>
+  941     <span class="sd">&quot;&quot;&quot;Setup PML commands for creating a ligand view corresponding to a ligand </span>
+  942 <span class="sd">    present in a selection. The ligand is identified using organic selection</span>
+  943 <span class="sd">    operator available in PyMOL in conjunction with the specified ligand ID.</span>
+  944 <span class="sd">    The ligand is colored by atom types and displayed as &#39;sticks&#39;.</span>
+  945 
+  946 <span class="sd">    Arguments:</span>
+  947 <span class="sd">        Name (str): Name of a new PyMOL ligand object.</span>
+  948 <span class="sd">        Selection (str): PyMOL selection containing ligand.</span>
+  949 <span class="sd">        LigandResName (str): Ligand ID.</span>
+  950 <span class="sd">        Enable (bool): Display status of ligand object.</span>
+  951 
+  952 <span class="sd">    Returns:</span>
+  953 <span class="sd">        str: PML commands for a ligand view.</span>
+  954 
+  955 <span class="sd">    &quot;&quot;&quot;</span>
+  956 
+  957     <span class="n">PMLCmds</span> <span class="o">=</span> <span class="p">[]</span>
+  958     <span class="n">PMLCmds</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;cmd.create(&quot;</span><span class="si">%s</span><span class="s2">&quot;, &quot;((</span><span class="si">%s</span><span class="s2">) and organic and (resn </span><span class="si">%s</span><span class="s2">))&quot;)&quot;&quot;&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">Name</span><span class="p">,</span> <span class="n">Selection</span><span class="p">,</span> <span class="n">LigandResName</span><span class="p">))</span>
+  959     <span class="n">PMLCmds</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;cmd.hide(&quot;everything&quot;, &quot;</span><span class="si">%s</span><span class="s2">&quot;)&quot;&quot;&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">Name</span><span class="p">))</span>
+  960     <span class="n">PMLCmds</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;util.cbag(&quot;</span><span class="si">%s</span><span class="s2">&quot;, _self = cmd)&quot;&quot;&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">Name</span><span class="p">))</span>
+  961     <span class="n">PMLCmds</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;cmd.show(&quot;sticks&quot;, &quot;</span><span class="si">%s</span><span class="s2">&quot;)&quot;&quot;&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">Name</span><span class="p">))</span>
+  962     <span class="n">PMLCmds</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">SetupPMLForEnableDisable</span><span class="p">(</span><span class="n">Name</span><span class="p">,</span> <span class="n">Enable</span><span class="p">))</span>
+  963     
+  964     <span class="n">PML</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">PMLCmds</span><span class="p">)</span>
+  965     
+  966     <span class="k">return</span> <span class="n">PML</span>
+  967 
+  968 <span class="k">def</span> <span class="nf">SetupPMLForLigandPocketView</span><span class="p">(</span><span class="n">Name</span><span class="p">,</span> <span class="n">Selection</span><span class="p">,</span> <span class="n">LigandSelection</span><span class="p">,</span> <span class="n">DistanceCutoff</span><span class="p">,</span> <span class="n">Enable</span> <span class="o">=</span> <span class="bp">True</span><span class="p">):</span>
+  969     <span class="sd">&quot;&quot;&quot;Setup PML commands for creating a ligand binding pocket view</span>
+  970 <span class="sd">    corresponding all residues present in a selection within a specified</span>
+  971 <span class="sd">    distance from a ligand selection. The solvent and inorganic portions of</span>
+  972 <span class="sd">    the selection are not included in the binding pocket. The pocket residues</span>
+  973 <span class="sd">    are shown as &#39;lines&#39;. The hydrogen atoms are not displayed.</span>
+  974 
+  975 <span class="sd">    Arguments:</span>
+  976 <span class="sd">        Name (str): Name of a new PyMOL binding pocket object.</span>
+  977 <span class="sd">        Selection (str): PyMOL selection containing binding pocket residues.</span>
+  978 <span class="sd">        LigandSelection (str): PyMOL selection containing ligand.</span>
+  979 <span class="sd">        DistanceCutoff (float): Distance cutoff from ligand for selecting</span>
+  980 <span class="sd">            binding pockect residues.</span>
+  981 <span class="sd">        Enable (bool): Display status of binding pocket object.</span>
+  982 
+  983 <span class="sd">    Returns:</span>
+  984 <span class="sd">        str: PML commands for a ligand binding pocket view.</span>
+  985 
+  986 <span class="sd">    &quot;&quot;&quot;</span>
+  987 
+  988     <span class="n">PMLCmds</span> <span class="o">=</span> <span class="p">[]</span>
+  989     <span class="n">PMLCmds</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;cmd.create(&quot;</span><span class="si">%s</span><span class="s2">&quot;, &quot;((byresidue (</span><span class="si">%s</span><span class="s2">) within </span><span class="si">%.1f</span><span class="s2"> of (</span><span class="si">%s</span><span class="s2">)) and (not solvent) and (not inorganic) and (not organic))&quot;)&quot;&quot;&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">Name</span><span class="p">,</span> <span class="n">Selection</span><span class="p">,</span> <span class="n">DistanceCutoff</span><span class="p">,</span> <span class="n">LigandSelection</span><span class="p">))</span>
+  990     <span class="n">PMLCmds</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;cmd.hide(&quot;everything&quot;, &quot;</span><span class="si">%s</span><span class="s2">&quot;)&quot;&quot;&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">Name</span><span class="p">))</span>
+  991     <span class="n">PMLCmds</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;cmd.show(&quot;lines&quot;, &quot;(</span><span class="si">%s</span><span class="s2">)&quot;)&quot;&quot;&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">Name</span><span class="p">))</span>
+  992     <span class="n">PMLCmds</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;cmd.hide(&quot;(</span><span class="si">%s</span><span class="s2"> and hydro)&quot;)&quot;&quot;&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">Name</span><span class="p">))</span>
+  993     <span class="n">PMLCmds</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">SetupPMLForEnableDisable</span><span class="p">(</span><span class="n">Name</span><span class="p">,</span> <span class="n">Enable</span><span class="p">))</span>
+  994     
+  995     <span class="n">PML</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">PMLCmds</span><span class="p">)</span>
+  996     
+  997     <span class="k">return</span> <span class="n">PML</span>
+  998 
+  999 <span class="k">def</span> <span class="nf">SetupPMLForLigandPocketSolventView</span><span class="p">(</span><span class="n">Name</span><span class="p">,</span> <span class="n">Selection</span><span class="p">,</span> <span class="n">LigandSelection</span><span class="p">,</span> <span class="n">DistanceCutoff</span><span class="p">,</span> <span class="n">Enable</span> <span class="o">=</span> <span class="bp">True</span><span class="p">):</span>
+ 1000     <span class="sd">&quot;&quot;&quot;Setup PML commands for creating a ligand binding pocket view</span>
+ 1001 <span class="sd">    corresponding to only solvent residues present in a selection within a</span>
+ 1002 <span class="sd">    specified distance from a ligand selection. The solvent pocket residues</span>
+ 1003 <span class="sd">    are shown as &#39;lines&#39; and &#39;nonbonded&#39;.</span>
+ 1004 
+ 1005 <span class="sd">    Arguments:</span>
+ 1006 <span class="sd">        Name (str): Name of a new PyMOL solvent binding pocket object.</span>
+ 1007 <span class="sd">        Selection (str): PyMOL selection containing binding pocket residues.</span>
+ 1008 <span class="sd">        LigandSelection (str): PyMOL selection containing ligand.</span>
+ 1009 <span class="sd">        DistanceCutoff (float): Distance cutoff from ligand for selecting</span>
+ 1010 <span class="sd">            binding pocket solvent residues.</span>
+ 1011 <span class="sd">        Enable (bool): Display status of binding pocket object.</span>
+ 1012 
+ 1013 <span class="sd">    Returns:</span>
+ 1014 <span class="sd">        str: PML commands for a ligand binding pocket view only showing solvent</span>
+ 1015 <span class="sd">            residues.</span>
+ 1016 
+ 1017 <span class="sd">    &quot;&quot;&quot;</span>
+ 1018 
+ 1019     <span class="n">PMLCmds</span> <span class="o">=</span> <span class="p">[]</span>
+ 1020     <span class="n">PMLCmds</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;cmd.create(&quot;</span><span class="si">%s</span><span class="s2">&quot;, &quot;((byresidue (</span><span class="si">%s</span><span class="s2">) within </span><span class="si">%.1f</span><span class="s2"> of (</span><span class="si">%s</span><span class="s2">)) and solvent)&quot;)&quot;&quot;&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">Name</span><span class="p">,</span> <span class="n">Selection</span><span class="p">,</span> <span class="n">DistanceCutoff</span><span class="p">,</span> <span class="n">LigandSelection</span><span class="p">))</span>
+ 1021     <span class="n">PMLCmds</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;cmd.hide(&quot;everything&quot;, &quot;</span><span class="si">%s</span><span class="s2">&quot;)&quot;&quot;&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">Name</span><span class="p">))</span>
+ 1022     <span class="n">PMLCmds</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;cmd.show(&quot;nonbonded&quot;, &quot;</span><span class="si">%s</span><span class="s2">&quot;)&quot;&quot;&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">Name</span><span class="p">))</span>
+ 1023     <span class="n">PMLCmds</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;cmd.show(&quot;lines&quot;, &quot;</span><span class="si">%s</span><span class="s2">&quot;)&quot;&quot;&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">Name</span><span class="p">))</span>
+ 1024     <span class="n">PMLCmds</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">SetupPMLForEnableDisable</span><span class="p">(</span><span class="n">Name</span><span class="p">,</span> <span class="n">Enable</span><span class="p">))</span>
+ 1025     
+ 1026     <span class="n">PML</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">PMLCmds</span><span class="p">)</span>
+ 1027     
+ 1028     <span class="k">return</span> <span class="n">PML</span>
+ 1029 
+ 1030 <span class="k">def</span> <span class="nf">SetupPMLForLigandPocketInorganicView</span><span class="p">(</span><span class="n">Name</span><span class="p">,</span> <span class="n">Selection</span><span class="p">,</span> <span class="n">LigandSelection</span><span class="p">,</span> <span class="n">DistanceCutoff</span><span class="p">,</span> <span class="n">Enable</span> <span class="o">=</span> <span class="bp">True</span><span class="p">):</span>
+ 1031     <span class="sd">&quot;&quot;&quot;Setup PML commands for creating a ligand binding pocket view</span>
+ 1032 <span class="sd">    corresponding to only inorganic residues present in a selection within a</span>
+ 1033 <span class="sd">    specified distance from a ligand selection. The inorganic pocket residues</span>
+ 1034 <span class="sd">    are shown as &#39;lines&#39; and &#39;nonbonded&#39;.</span>
+ 1035 
+ 1036 <span class="sd">    Arguments:</span>
+ 1037 <span class="sd">        Name (str): Name of a new PyMOL solvent binding pocket object.</span>
+ 1038 <span class="sd">        Selection (str): PyMOL selection containing binding pocket residues.</span>
+ 1039 <span class="sd">        LigandSelection (str): PyMOL selection containing ligand.</span>
+ 1040 <span class="sd">        DistanceCutoff (float): Distance cutoff from ligand for selecting</span>
+ 1041 <span class="sd">            binding pocket inorganic residues.</span>
+ 1042 <span class="sd">        Enable (bool): Display status of binding pocket object.</span>
+ 1043 
+ 1044 <span class="sd">    Returns:</span>
+ 1045 <span class="sd">        str: PML commands for a ligand binding pocket view only showing inorganic</span>
+ 1046 <span class="sd">            residues.</span>
+ 1047 
+ 1048 <span class="sd">    &quot;&quot;&quot;</span>
+ 1049 
+ 1050     <span class="n">PMLCmds</span> <span class="o">=</span> <span class="p">[]</span>
+ 1051     <span class="n">PMLCmds</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;cmd.create(&quot;</span><span class="si">%s</span><span class="s2">&quot;, &quot;((byresidue (</span><span class="si">%s</span><span class="s2">) within </span><span class="si">%.1f</span><span class="s2"> of (</span><span class="si">%s</span><span class="s2">)) and inorganic)&quot;)&quot;&quot;&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">Name</span><span class="p">,</span> <span class="n">Selection</span><span class="p">,</span> <span class="n">DistanceCutoff</span><span class="p">,</span> <span class="n">LigandSelection</span><span class="p">))</span>
+ 1052     <span class="n">PMLCmds</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;cmd.hide(&quot;everything&quot;, &quot;</span><span class="si">%s</span><span class="s2">&quot;)&quot;&quot;&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">Name</span><span class="p">))</span>
+ 1053     <span class="n">PMLCmds</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;cmd.show(&quot;nonbonded&quot;, &quot;</span><span class="si">%s</span><span class="s2">&quot;)&quot;&quot;&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">Name</span><span class="p">))</span>
+ 1054     <span class="n">PMLCmds</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;cmd.show(&quot;lines&quot;, &quot;</span><span class="si">%s</span><span class="s2">&quot;)&quot;&quot;&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">Name</span><span class="p">))</span>
+ 1055     <span class="n">PMLCmds</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">SetupPMLForEnableDisable</span><span class="p">(</span><span class="n">Name</span><span class="p">,</span> <span class="n">Enable</span><span class="p">))</span>
+ 1056     
+ 1057     <span class="n">PML</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">PMLCmds</span><span class="p">)</span>
+ 1058     
+ 1059     <span class="k">return</span> <span class="n">PML</span>
+ 1060 
+ 1061 <span class="k">def</span> <span class="nf">SetupPMLForPolarContactsView</span><span class="p">(</span><span class="n">Name</span><span class="p">,</span> <span class="n">Selection1</span><span class="p">,</span> <span class="n">Selection2</span><span class="p">,</span> <span class="n">Enable</span> <span class="o">=</span> <span class="bp">True</span><span class="p">,</span> <span class="n">Color</span> <span class="o">=</span> <span class="s2">&quot;yellow&quot;</span><span class="p">):</span>
+ 1062     <span class="sd">&quot;&quot;&quot;Setup PML commands for creating polar contacts view between a pair of</span>
+ 1063 <span class="sd">    selections. The polar contact view is generated using &#39;util.dist&#39; command. The</span>
+ 1064 <span class="sd">    distance labels are shown by default.</span>
+ 1065 
+ 1066 <span class="sd">    Arguments:</span>
+ 1067 <span class="sd">        Name (str): Name of a new PyMOL polar contacts object.</span>
+ 1068 <span class="sd">        Selection1 (str): First PyMOL selection.</span>
+ 1069 <span class="sd">        Selection2 (str): Second PyMOL selection.</span>
+ 1070 <span class="sd">        Enable (bool): Display status of polar contacts object.</span>
+ 1071 <span class="sd">        Colot (str): Color for polar contact lines and labels.</span>
+ 1072 
+ 1073 <span class="sd">    Returns:</span>
+ 1074 <span class="sd">        str: PML commands for polar contacts view between a pair of selections.</span>
+ 1075 
+ 1076 <span class="sd">    &quot;&quot;&quot;</span>
+ 1077     
+ 1078     <span class="n">PMLCmds</span> <span class="o">=</span> <span class="p">[]</span>
+ 1079     <span class="n">PMLCmds</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;cmd.dist(&quot;</span><span class="si">%s</span><span class="s2">&quot;,&quot;(</span><span class="si">%s</span><span class="s2">)&quot;,&quot;(</span><span class="si">%s</span><span class="s2">)&quot;,quiet = 1, mode = 2, label = 1, reset = 1)&quot;&quot;&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">Name</span><span class="p">,</span> <span class="n">Selection1</span><span class="p">,</span> <span class="n">Selection2</span><span class="p">))</span>
+ 1080     <span class="n">PMLCmds</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;util.color_deep(&quot;</span><span class="si">%s</span><span class="s2">&quot;, &quot;</span><span class="si">%s</span><span class="s2">&quot;)&quot;&quot;&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">Color</span><span class="p">,</span> <span class="n">Name</span><span class="p">))</span>
+ 1081     <span class="n">PMLCmds</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">SetupPMLForEnableDisable</span><span class="p">(</span><span class="n">Name</span><span class="p">,</span> <span class="n">Enable</span><span class="p">))</span>
+ 1082     
+ 1083     <span class="n">PML</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">PMLCmds</span><span class="p">)</span>
+ 1084     
+ 1085     <span class="k">return</span> <span class="n">PML</span>
+ 1086 
+ 1087 <span class="k">def</span> <span class="nf">SetupPMLForAlignment</span><span class="p">(</span><span class="n">Method</span><span class="p">,</span> <span class="n">RefSelection</span><span class="p">,</span> <span class="n">FitSelection</span><span class="p">):</span>
+ 1088     <span class="sd">&quot;&quot;&quot;Setup PML commands for aligning a pair of selection using  a specified</span>
+ 1089 <span class="sd">    alignment method.</span>
+ 1090 
+ 1091 <span class="sd">    Arguments:</span>
+ 1092 <span class="sd">        Method (str): Alignment method. Possible values: align, cealign, super.</span>
+ 1093 <span class="sd">        RefSelection (str): Name of reference selection which stays stationary.</span>
+ 1094 <span class="sd">        FitSelection (str): Name of selection to align to reference selection.</span>
+ 1095 
+ 1096 <span class="sd">    Returns:</span>
+ 1097 <span class="sd">        str: PML commands for aligning  a pair of selections.</span>
+ 1098 
+ 1099 <span class="sd">    &quot;&quot;&quot;</span>
+ 1100 
+ 1101     <span class="n">PMLCmds</span> <span class="o">=</span> <span class="p">[]</span>
+ 1102     <span class="k">if</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="s2">&quot;^align$&quot;</span><span class="p">,</span> <span class="n">Method</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">I</span><span class="p">):</span>
+ 1103         <span class="n">PMLCmds</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;cmd.align(&quot;(</span><span class="si">%s</span><span class="s2">)&quot;, &quot;(</span><span class="si">%s</span><span class="s2">)&quot;)&quot;&quot;&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">FitSelection</span><span class="p">,</span> <span class="n">RefSelection</span><span class="p">))</span>
+ 1104     <span class="k">elif</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="s2">&quot;^cealign$&quot;</span><span class="p">,</span> <span class="n">Method</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">I</span><span class="p">):</span>
+ 1105         <span class="n">PMLCmds</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;cmd.cealign(&quot;(</span><span class="si">%s</span><span class="s2">)&quot;, &quot;(</span><span class="si">%s</span><span class="s2">)&quot;)&quot;&quot;&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">RefSelection</span><span class="p">,</span> <span class="n">FitSelection</span><span class="p">))</span>
+ 1106     <span class="k">elif</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="s2">&quot;^super$&quot;</span><span class="p">,</span> <span class="n">Method</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">I</span><span class="p">):</span>
+ 1107         <span class="n">PMLCmds</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;cmd.super(&quot;(</span><span class="si">%s</span><span class="s2">)&quot;, &quot;(</span><span class="si">%s</span><span class="s2">)&quot;)&quot;&quot;&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">FitSelection</span><span class="p">,</span> <span class="n">RefSelection</span><span class="p">))</span>
+ 1108     <span class="k">else</span><span class="p">:</span>
+ 1109         <span class="n">MiscUtil</span><span class="o">.</span><span class="n">PrintWarning</span><span class="p">(</span><span class="s2">&quot;PyMOLUtil.SetupPMLForAlignment: Invalid method name: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">Method</span><span class="p">)</span>
+ 1110 
+ 1111     <span class="n">PML</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">PMLCmds</span><span class="p">)</span>
+ 1112     
+ 1113     <span class="k">return</span> <span class="n">PML</span>
+ 1114 
+ 1115 <span class="k">def</span> <span class="nf">SetupPMLForBFactorPuttyView</span><span class="p">(</span><span class="n">Name</span><span class="p">,</span> <span class="n">Selection</span><span class="p">,</span> <span class="n">ColorPalette</span> <span class="o">=</span> <span class="s2">&quot;blue_white_red&quot;</span><span class="p">,</span> <span class="n">Enable</span> <span class="o">=</span> <span class="bp">True</span><span class="p">):</span>
+ 1116     <span class="sd">&quot;&quot;&quot;Setup PML commands for creating a B factor putty view for a specified</span>
+ 1117 <span class="sd">    selection. The B factor values must be available for the atoms. The atoms</span>
+ 1118 <span class="sd">    are colored using a color spectrum corresponding to a specified color</span>
+ 1119 <span class="sd">    palette. Any valid PyMOL color palette name may be used.</span>
+ 1120 
+ 1121 <span class="sd">    Arguments:</span>
+ 1122 <span class="sd">        Name (str): Name of a new PyMOL B factor putty object.</span>
+ 1123 <span class="sd">        Selection (str): Name of PyMOL selection.</span>
+ 1124 <span class="sd">        ColorPalette (str): Name of color palette to use for color spectrum.</span>
+ 1125 <span class="sd">        Enable (bool): Display status of B factor putty object.</span>
+ 1126 
+ 1127 <span class="sd">    Returns:</span>
+ 1128 <span class="sd">        str: PML commands for B factor putty view.</span>
+ 1129 
+ 1130 <span class="sd">    &quot;&quot;&quot;</span>
+ 1131     
+ 1132     <span class="n">PMLCmds</span> <span class="o">=</span> <span class="p">[]</span>
+ 1133     <span class="n">PMLCmds</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;cmd.create(&quot;</span><span class="si">%s</span><span class="s2">&quot;, &quot;(</span><span class="si">%s</span><span class="s2">)&quot;)&quot;&quot;&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">Name</span><span class="p">,</span> <span class="n">Selection</span><span class="p">))</span>
+ 1134     <span class="n">PMLCmds</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;cmd.spectrum(&quot;b&quot;, &quot;</span><span class="si">%s</span><span class="s2">&quot;, &quot;(</span><span class="si">%s</span><span class="s2">)&quot;)&quot;&quot;&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">ColorPalette</span><span class="p">,</span> <span class="n">Name</span><span class="p">))</span>
+ 1135     <span class="n">PMLCmds</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;cmd.show(&quot;cartoon&quot;, &quot;</span><span class="si">%s</span><span class="s2">&quot;)&quot;&quot;&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">Name</span><span class="p">))</span>
+ 1136     <span class="n">PMLCmds</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;cmd.cartoon(&quot;putty&quot;, &quot;</span><span class="si">%s</span><span class="s2">&quot;)&quot;&quot;&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">Name</span><span class="p">))</span>
+ 1137     <span class="n">PMLCmds</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">SetupPMLForEnableDisable</span><span class="p">(</span><span class="n">Name</span><span class="p">,</span> <span class="n">Enable</span><span class="p">))</span>
+ 1138     
+ 1139     <span class="n">PML</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">PMLCmds</span><span class="p">)</span>
+ 1140     
+ 1141     <span class="k">return</span> <span class="n">PML</span>
+ 1142 
+ 1143 <span class="k">def</span> <span class="nf">SetupPMLForHydrophobicSurfaceView</span><span class="p">(</span><span class="n">Name</span><span class="p">,</span> <span class="n">Selection</span><span class="p">,</span> <span class="n">ColorPalette</span> <span class="o">=</span> <span class="s2">&quot;RedToWhite&quot;</span><span class="p">,</span> <span class="n">Enable</span> <span class="o">=</span> <span class="bp">True</span><span class="p">):</span>
+ 1144     <span class="sd">&quot;&quot;&quot;Setup PML commands for creating a hydrophobic surface view for a specified</span>
+ 1145 <span class="sd">    selection. The surfaces are colored using a specified color palette. This is only valid</span>
+ 1146 <span class="sd">    for amino acids.</span>
+ 1147 
+ 1148 <span class="sd">    Arguments:</span>
+ 1149 <span class="sd">        Name (str): Name of a new PyMOL hydrophobic surface object.</span>
+ 1150 <span class="sd">        Selection (str): Name of PyMOL selection.</span>
+ 1151 <span class="sd">        ColorPalette (str): Name of color palette to use for coloring surfaces.</span>
+ 1152 <span class="sd">            Possible values: RedToWhite or WhiteToGreen for most hydrophobic</span>
+ 1153 <span class="sd">            to least hydrophobic amino acids.</span>
+ 1154 <span class="sd">        Enable (bool): Display status of surface object.</span>
+ 1155 
+ 1156 <span class="sd">    Returns:</span>
+ 1157 <span class="sd">        str: PML commands for hydrophobic surface view.</span>
+ 1158 
+ 1159 <span class="sd">    &quot;&quot;&quot;</span>
+ 1160 
+ 1161     <span class="n">PMLCmds</span> <span class="o">=</span> <span class="p">[]</span>
+ 1162     <span class="n">PMLCmds</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;cmd.create(&quot;</span><span class="si">%s</span><span class="s2">&quot;, &quot;(</span><span class="si">%s</span><span class="s2">)&quot;)&quot;&quot;&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">Name</span><span class="p">,</span> <span class="n">Selection</span><span class="p">))</span>
+ 1163     <span class="n">PMLCmds</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;cmd.show(&quot;surface&quot;, &quot;</span><span class="si">%s</span><span class="s2">&quot;)&quot;&quot;&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">Name</span><span class="p">))</span>
+ 1164     <span class="n">PMLCmds</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;ColorByHydrophobicity(&quot;</span><span class="si">%s</span><span class="s2">&quot;, &quot;</span><span class="si">%s</span><span class="s2">&quot;)&quot;&quot;&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">Name</span><span class="p">,</span> <span class="n">ColorPalette</span><span class="p">))</span>
+ 1165     <span class="n">PMLCmds</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">SetupPMLForEnableDisable</span><span class="p">(</span><span class="n">Name</span><span class="p">,</span> <span class="n">Enable</span><span class="p">))</span>
+ 1166     
+ 1167     <span class="n">PML</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">PMLCmds</span><span class="p">)</span>
+ 1168     
+ 1169     <span class="k">return</span> <span class="n">PML</span>
+ 1170 
+ 1171 <span class="k">def</span> <span class="nf">SetupPMLForSurfaceView</span><span class="p">(</span><span class="n">Name</span><span class="p">,</span> <span class="n">Selection</span><span class="p">,</span> <span class="n">Enable</span> <span class="o">=</span> <span class="bp">True</span><span class="p">):</span>
+ 1172     <span class="sd">&quot;&quot;&quot;Setup PML commands for creating a molecular surface view for a specified</span>
+ 1173 <span class="sd">    selection.</span>
+ 1174 
+ 1175 <span class="sd">    Arguments:</span>
+ 1176 <span class="sd">        Name (str): Name of a new PyMOL molecular surface object.</span>
+ 1177 <span class="sd">        Selection (str): Name of PyMOL selection.</span>
+ 1178 <span class="sd">        Enable (bool): Display status of surface object.</span>
+ 1179 
+ 1180 <span class="sd">    Returns:</span>
+ 1181 <span class="sd">        str: PML commands for molecular surface view.</span>
+ 1182 
+ 1183 <span class="sd">    &quot;&quot;&quot;</span>
+ 1184 
+ 1185     <span class="n">PMLCmds</span> <span class="o">=</span> <span class="p">[]</span>
+ 1186     <span class="n">PMLCmds</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;cmd.create(&quot;</span><span class="si">%s</span><span class="s2">&quot;, &quot;(</span><span class="si">%s</span><span class="s2">)&quot;)&quot;&quot;&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">Name</span><span class="p">,</span> <span class="n">Selection</span><span class="p">))</span>
+ 1187     <span class="n">PMLCmds</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;cmd.show(&quot;surface&quot;, &quot;</span><span class="si">%s</span><span class="s2">&quot;)&quot;&quot;&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">Name</span><span class="p">))</span>
+ 1188     <span class="n">PMLCmds</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">SetupPMLForEnableDisable</span><span class="p">(</span><span class="n">Name</span><span class="p">,</span> <span class="n">Enable</span><span class="p">))</span>
+ 1189     
+ 1190     <span class="n">PML</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">PMLCmds</span><span class="p">)</span>
+ 1191     
+ 1192     <span class="k">return</span> <span class="n">PML</span>
+ 1193 
+ 1194 <span class="k">def</span> <span class="nf">SetupPMLForBallAndStickView</span><span class="p">(</span><span class="n">Name</span><span class="p">,</span> <span class="n">Selection</span><span class="p">,</span> <span class="n">Enable</span> <span class="o">=</span> <span class="bp">True</span><span class="p">,</span> <span class="n">SphereScale</span> <span class="o">=</span> <span class="mf">0.3</span><span class="p">,</span> <span class="n">StickRadius</span> <span class="o">=</span> <span class="mf">0.2</span><span class="p">):</span>
+ 1195     <span class="sd">&quot;&quot;&quot;Setup PML commands for creating a ball and stick view for a specified</span>
+ 1196 <span class="sd">    selection.</span>
+ 1197 
+ 1198 <span class="sd">    Arguments:</span>
+ 1199 <span class="sd">        Name (str): Name of a new PyMOL ball and stick object.</span>
+ 1200 <span class="sd">        Selection (str): Name of PyMOL selection.</span>
+ 1201 <span class="sd">        Enable (bool): Display status of ball and stick object.</span>
+ 1202 <span class="sd">        SphereScale (float): Scaling factor for sphere radii.</span>
+ 1203 <span class="sd">        StickScale (float): Scaling factor for stick radii.</span>
+ 1204 
+ 1205 <span class="sd">    Returns:</span>
+ 1206 <span class="sd">        str: PML commands for ball and stick view.</span>
+ 1207 
+ 1208 <span class="sd">    &quot;&quot;&quot;</span>
+ 1209 
+ 1210     <span class="n">PMLCmds</span> <span class="o">=</span> <span class="p">[]</span>
+ 1211     <span class="n">PMLCmds</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;cmd.create(&quot;</span><span class="si">%s</span><span class="s2">&quot;, &quot;(</span><span class="si">%s</span><span class="s2">)&quot;)&quot;&quot;&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">Name</span><span class="p">,</span> <span class="n">Selection</span><span class="p">))</span>
+ 1212     <span class="n">PMLCmds</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;cmd.hide(&quot;everything&quot;, &quot;</span><span class="si">%s</span><span class="s2">&quot;)&quot;&quot;&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">Name</span><span class="p">))</span>
+ 1213     <span class="n">PMLCmds</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;cmd.show(&quot;sphere&quot;, &quot;</span><span class="si">%s</span><span class="s2">&quot;)&quot;&quot;&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">Name</span><span class="p">))</span>
+ 1214     <span class="n">PMLCmds</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;cmd.show(&quot;sticks&quot;, &quot;</span><span class="si">%s</span><span class="s2">&quot;)&quot;&quot;&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">Name</span><span class="p">))</span>
+ 1215     <span class="n">PMLCmds</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;cmd.set(&quot;sphere_scale&quot;, </span><span class="si">%.1f</span><span class="s2">, &quot;</span><span class="si">%s</span><span class="s2">&quot;)&quot;&quot;&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">SphereScale</span><span class="p">,</span> <span class="n">Name</span><span class="p">))</span>
+ 1216     <span class="n">PMLCmds</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;cmd.set(&quot;stick_radius&quot;, </span><span class="si">%.1f</span><span class="s2">, &quot;</span><span class="si">%s</span><span class="s2">&quot;)&quot;&quot;&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">StickRadius</span><span class="p">,</span> <span class="n">Name</span><span class="p">))</span>
+ 1217     
+ 1218     <span class="n">PMLCmds</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">SetupPMLForEnableDisable</span><span class="p">(</span><span class="n">Name</span><span class="p">,</span> <span class="n">Enable</span><span class="p">))</span>
+ 1219     
+ 1220     <span class="n">PML</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">PMLCmds</span><span class="p">)</span>
+ 1221     
+ 1222     <span class="k">return</span> <span class="n">PML</span>
+ 1223 
+ 1224 <span class="k">def</span> <span class="nf">SetupPMLForInorganicView</span><span class="p">(</span><span class="n">Name</span><span class="p">,</span> <span class="n">Selection</span><span class="p">,</span> <span class="n">Enable</span> <span class="o">=</span> <span class="bp">True</span><span class="p">):</span>
+ 1225     <span class="sd">&quot;&quot;&quot;Setup PML commands for creating a inorganic view corresponding to</span>
+ 1226 <span class="sd">    inorganic residues present in a selection. The inorganic residues are</span>
+ 1227 <span class="sd">    identified using inorganic selection operator available in PyMOL. The</span>
+ 1228 <span class="sd">    inorganic residues are displayed as &#39;lines&#39; and &#39;nonbonded&#39;.</span>
+ 1229 
+ 1230 <span class="sd">    Arguments:</span>
+ 1231 <span class="sd">        Name (str): Name of a new PyMOL inorganic object.</span>
+ 1232 <span class="sd">        Selection (str): Name of PyMOL selection.</span>
+ 1233 <span class="sd">        Enable (bool): Display status of inorganic object.</span>
+ 1234 
+ 1235 <span class="sd">    Returns:</span>
+ 1236 <span class="sd">        str: PML commands for inorganic view.</span>
+ 1237 
+ 1238 <span class="sd">    &quot;&quot;&quot;</span>
+ 1239 
+ 1240     <span class="n">PMLCmds</span> <span class="o">=</span> <span class="p">[]</span>
+ 1241     <span class="n">PMLCmds</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;cmd.create(&quot;</span><span class="si">%s</span><span class="s2">&quot;, &quot;((</span><span class="si">%s</span><span class="s2">) and inorganic)&quot;)&quot;&quot;&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">Name</span><span class="p">,</span> <span class="n">Selection</span><span class="p">))</span>
+ 1242     <span class="n">PMLCmds</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;cmd.show(&quot;nonbonded&quot;, &quot;</span><span class="si">%s</span><span class="s2">&quot;)&quot;&quot;&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">Name</span><span class="p">))</span>
+ 1243     <span class="n">PMLCmds</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;cmd.show(&quot;lines&quot;, &quot;</span><span class="si">%s</span><span class="s2">&quot;)&quot;&quot;&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">Name</span><span class="p">))</span>
+ 1244     <span class="n">PMLCmds</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">SetupPMLForEnableDisable</span><span class="p">(</span><span class="n">Name</span><span class="p">,</span> <span class="n">Enable</span><span class="p">))</span>
+ 1245     
+ 1246     <span class="n">PML</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">PMLCmds</span><span class="p">)</span>
+ 1247     
+ 1248     <span class="k">return</span> <span class="n">PML</span>
+ 1249 
+ 1250 <span class="k">def</span> <span class="nf">SetupPMLForSolventView</span><span class="p">(</span><span class="n">Name</span><span class="p">,</span> <span class="n">Selection</span><span class="p">,</span> <span class="n">Enable</span> <span class="o">=</span> <span class="bp">True</span><span class="p">):</span>
+ 1251     <span class="sd">&quot;&quot;&quot;Setup PML commands for creating a solvent view corresponding to</span>
+ 1252 <span class="sd">    solvent residues present in a selection. The solvent residues are</span>
+ 1253 <span class="sd">    identified using solvent selection operator available in PyMOL. The</span>
+ 1254 <span class="sd">    solvent residues are displayed as &#39;nonbonded&#39;.</span>
+ 1255 
+ 1256 <span class="sd">    Arguments:</span>
+ 1257 <span class="sd">        Name (str): Name of a new PyMOL solvent object.</span>
+ 1258 <span class="sd">        Selection (str): Name of PyMOL selection.</span>
+ 1259 <span class="sd">        Enable (bool): Display status of inorganic object.</span>
+ 1260 
+ 1261 <span class="sd">    Returns:</span>
+ 1262 <span class="sd">        str: PML commands for solvent view.</span>
+ 1263 
+ 1264 <span class="sd">    &quot;&quot;&quot;</span>
+ 1265 
+ 1266     <span class="n">PMLCmds</span> <span class="o">=</span> <span class="p">[]</span>
+ 1267     <span class="n">PMLCmds</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;cmd.create(&quot;</span><span class="si">%s</span><span class="s2">&quot;, &quot;((</span><span class="si">%s</span><span class="s2">) and solvent)&quot;)&quot;&quot;&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">Name</span><span class="p">,</span> <span class="n">Selection</span><span class="p">))</span>
+ 1268     <span class="n">PMLCmds</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;cmd.show(&quot;nonbonded&quot;, &quot;</span><span class="si">%s</span><span class="s2">&quot;)&quot;&quot;&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">Name</span><span class="p">))</span>
+ 1269     <span class="n">PMLCmds</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">SetupPMLForEnableDisable</span><span class="p">(</span><span class="n">Name</span><span class="p">,</span> <span class="n">Enable</span><span class="p">))</span>
+ 1270     
+ 1271     <span class="n">PML</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">PMLCmds</span><span class="p">)</span>
+ 1272     
+ 1273     <span class="k">return</span> <span class="n">PML</span>
+ 1274 
+ 1275 <span class="k">def</span> <span class="nf">SetupPMLForPolymerChainView</span><span class="p">(</span><span class="n">Name</span><span class="p">,</span> <span class="n">Selection</span><span class="p">,</span> <span class="n">Enable</span> <span class="o">=</span> <span class="bp">True</span><span class="p">):</span>
+ 1276     <span class="sd">&quot;&quot;&quot;Setup PML commands for creating a polymer chain view corresponding</span>
+ 1277 <span class="sd">    to backbone and sidechain residues in a selection. The polymer chain is</span>
+ 1278 <span class="sd">    displayed as &#39;cartoon&#39;.</span>
+ 1279 
+ 1280 <span class="sd">    Arguments:</span>
+ 1281 <span class="sd">        Name (str): Name of a new PyMOL polymer chain object.</span>
+ 1282 <span class="sd">        Selection (str): Name of PyMOL selection.</span>
+ 1283 <span class="sd">        Enable (bool): Display status of chain object.</span>
+ 1284 
+ 1285 <span class="sd">    Returns:</span>
+ 1286 <span class="sd">        str: PML commands for polymer chain view.</span>
+ 1287 
+ 1288 <span class="sd">    &quot;&quot;&quot;</span>
+ 1289 
+ 1290     <span class="n">PMLCmds</span> <span class="o">=</span> <span class="p">[]</span>
+ 1291     <span class="n">PMLCmds</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;cmd.create(&quot;</span><span class="si">%s</span><span class="s2">&quot;, &quot;((</span><span class="si">%s</span><span class="s2">) and (backbone or sidechain))&quot;)&quot;&quot;&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">Name</span><span class="p">,</span> <span class="n">Selection</span><span class="p">))</span>
+ 1292     <span class="n">PMLCmds</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;cmd.hide(&quot;everything&quot;, &quot;</span><span class="si">%s</span><span class="s2">&quot;)&quot;&quot;&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">Name</span><span class="p">))</span>
+ 1293     <span class="n">PMLCmds</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;util.cbag(&quot;</span><span class="si">%s</span><span class="s2">&quot;, _self = cmd)&quot;&quot;&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">Name</span><span class="p">))</span>
+ 1294     <span class="n">PMLCmds</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;cmd.show(&quot;cartoon&quot;, &quot;</span><span class="si">%s</span><span class="s2">&quot;)&quot;&quot;&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">Name</span><span class="p">))</span>
+ 1295     <span class="n">PMLCmds</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">SetupPMLForEnableDisable</span><span class="p">(</span><span class="n">Name</span><span class="p">,</span> <span class="n">Enable</span><span class="p">))</span>
+ 1296     
+ 1297     
+ 1298     <span class="n">PML</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">PMLCmds</span><span class="p">)</span>
+ 1299     
+ 1300     <span class="k">return</span> <span class="n">PML</span>
+ 1301 
+ 1302 
+ 1303 <span class="k">def</span> <span class="nf">SetupPMLForPolymerComplexView</span><span class="p">(</span><span class="n">MoleculeName</span><span class="p">,</span> <span class="n">PDBFile</span><span class="p">,</span> <span class="n">Enable</span> <span class="o">=</span> <span class="bp">True</span><span class="p">,</span> <span class="n">ShowSolvent</span> <span class="o">=</span> <span class="bp">True</span><span class="p">,</span> <span class="n">ShowInorganic</span> <span class="o">=</span> <span class="bp">True</span><span class="p">,</span> <span class="n">ShowLines</span> <span class="o">=</span> <span class="bp">True</span><span class="p">):</span>
+ 1304     <span class="sd">&quot;&quot;&quot;Setup PML commands for creating a polymer complex view for all chains</span>
+ 1305 <span class="sd">    in a PDB file. The solvent and inorganic residues are also shown by default.</span>
+ 1306 <span class="sd">     The polymer chains are displayed as &#39;cartoon&#39;. The &#39;line&#39; display for the</span>
+ 1307 <span class="sd">    polymer chains is also shown and may be turned off. The organic residues are</span>
+ 1308 <span class="sd">    displayed as &#39;sticks&#39;. The solvent and inorganic residues are displayed as</span>
+ 1309 <span class="sd">    &#39;nonbonded&#39; and &#39;lines&#39;.</span>
+ 1310 <span class="sd">    </span>
+ 1311 <span class="sd">    Arguments:</span>
+ 1312 <span class="sd">        MoleculeName (str): Name of a new PyMOL molecule object.</span>
+ 1313 <span class="sd">        PDBFile (str): Name of PDB file.</span>
+ 1314 <span class="sd">        Enable (bool): Display status of chain object.</span>
+ 1315 <span class="sd">        ShowSolvent (bool): Display solvent residues.</span>
+ 1316 <span class="sd">        ShowInorganic (bool): Display inorganic residues.</span>
+ 1317 <span class="sd">        ShowLines (bool): Display lines for polymer chains.</span>
+ 1318 
+ 1319 <span class="sd">    Returns:</span>
+ 1320 <span class="sd">        str: PML commands for polymer complex view.</span>
+ 1321 
+ 1322 <span class="sd">    &quot;&quot;&quot;</span>
+ 1323 
+ 1324     <span class="n">PMLCmds</span> <span class="o">=</span> <span class="p">[]</span>
+ 1325     
+ 1326     <span class="n">PMLCmds</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;cmd.load(&quot;</span><span class="si">%s</span><span class="s2">&quot;, &quot;</span><span class="si">%s</span><span class="s2">&quot;)&quot;&quot;&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">PDBFile</span><span class="p">,</span> <span class="n">MoleculeName</span><span class="p">))</span>
+ 1327     <span class="n">PML</span> <span class="o">=</span> <span class="n">_SetupPMLForPolymerComplexView</span><span class="p">(</span><span class="n">MoleculeName</span><span class="p">,</span> <span class="n">Enable</span><span class="p">,</span> <span class="n">ShowSolvent</span><span class="p">,</span> <span class="n">ShowInorganic</span><span class="p">,</span> <span class="n">ShowLines</span><span class="p">)</span>
+ 1328     <span class="n">PMLCmds</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">PML</span><span class="p">)</span>
+ 1329     
+ 1330     <span class="n">PML</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">PMLCmds</span><span class="p">)</span>
+ 1331     
+ 1332     <span class="k">return</span> <span class="n">PML</span>
+ 1333 
+ 1334 <span class="k">def</span> <span class="nf">SetupPMLForPolymerChainComplexView</span><span class="p">(</span><span class="n">ChainComplexName</span><span class="p">,</span> <span class="n">Selection</span><span class="p">,</span> <span class="n">ChainName</span><span class="p">,</span> <span class="n">Enable</span> <span class="o">=</span> <span class="bp">True</span><span class="p">,</span> <span class="n">ShowSolvent</span> <span class="o">=</span> <span class="bp">True</span><span class="p">,</span> <span class="n">ShowInorganic</span> <span class="o">=</span> <span class="bp">True</span><span class="p">,</span> <span class="n">ShowLines</span> <span class="o">=</span> <span class="bp">True</span><span class="p">):</span>
+ 1335     <span class="sd">&quot;&quot;&quot;Setup PML commands for creating a polymer chain complex view for a specified</span>
+ 1336 <span class="sd">    chain in a selection. The solvent and inorganic residues are also shown by</span>
+ 1337 <span class="sd">    default. The polymer chain is displayed as &#39;cartoon&#39;. The &#39;line&#39; display for the</span>
+ 1338 <span class="sd">    polymer chain is also shown and may be turned off. The organic residues are</span>
+ 1339 <span class="sd">    displayed as &#39;sticks&#39;. The solvent and inorganic residues are displayed as</span>
+ 1340 <span class="sd">    &#39;nonbonded&#39; and &#39;lines&#39;.</span>
+ 1341 
+ 1342 <span class="sd">    Arguments:</span>
+ 1343 <span class="sd">        ChainComplexName (str): Name of a new PyMOL polymer chain complex.</span>
+ 1344 <span class="sd">        Selection (str): Name of PyMOL selection.</span>
+ 1345 <span class="sd">        ChainName (str): Name of a chain.</span>
+ 1346 <span class="sd">        Enable (bool): Display status of chain object.</span>
+ 1347 <span class="sd">        ShowSolvent (bool): Display solvent residues.</span>
+ 1348 <span class="sd">        ShowInorganic (bool): Display inorganic residues.</span>
+ 1349 <span class="sd">        ShowLines (bool): Display lines for polymer chain.</span>
+ 1350 
+ 1351 <span class="sd">    Returns:</span>
+ 1352 <span class="sd">        str: PML commands for polymer chain complex view.</span>
+ 1353 
+ 1354 <span class="sd">    &quot;&quot;&quot;</span>
+ 1355 
+ 1356     <span class="n">PMLCmds</span> <span class="o">=</span> <span class="p">[]</span>
+ 1357     
+ 1358     <span class="n">PMLCmds</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;cmd.create(&quot;</span><span class="si">%s</span><span class="s2">&quot;, &quot;(</span><span class="si">%s</span><span class="s2"> and chain </span><span class="si">%s</span><span class="s2">)&quot;)&quot;&quot;&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">ChainComplexName</span><span class="p">,</span> <span class="n">Selection</span><span class="p">,</span> <span class="n">ChainName</span><span class="p">))</span>
+ 1359     <span class="n">PML</span> <span class="o">=</span> <span class="n">_SetupPMLForPolymerComplexView</span><span class="p">(</span><span class="n">ChainComplexName</span><span class="p">,</span> <span class="n">Enable</span><span class="p">,</span> <span class="n">ShowSolvent</span><span class="p">,</span> <span class="n">ShowInorganic</span><span class="p">,</span> <span class="n">ShowLines</span><span class="p">)</span>
+ 1360     <span class="n">PMLCmds</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">PML</span><span class="p">)</span>
+ 1361 
+ 1362     <span class="n">PML</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">PMLCmds</span><span class="p">)</span>
+ 1363     
+ 1364     <span class="k">return</span> <span class="n">PML</span>
+ 1365 
+ 1366 <span class="k">def</span> <span class="nf">_SetupPMLForPolymerComplexView</span><span class="p">(</span><span class="n">Name</span><span class="p">,</span> <span class="n">Enable</span> <span class="o">=</span> <span class="bp">True</span><span class="p">,</span> <span class="n">ShowSolvent</span> <span class="o">=</span> <span class="bp">True</span><span class="p">,</span> <span class="n">ShowInorganic</span> <span class="o">=</span> <span class="bp">True</span><span class="p">,</span>  <span class="n">ShowLines</span> <span class="o">=</span> <span class="bp">False</span><span class="p">):</span>
+ 1367     <span class="sd">&quot;&quot;&quot;Setup PML for creating a polymer complex view.&quot;&quot;&quot;</span>
+ 1368 
+ 1369     <span class="n">PMLCmds</span> <span class="o">=</span> <span class="p">[]</span>
+ 1370     
+ 1371     <span class="n">PMLCmds</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;cmd.hide(&quot;everything&quot;, &quot;</span><span class="si">%s</span><span class="s2">&quot;)&quot;&quot;&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">Name</span><span class="p">))</span>
+ 1372     <span class="n">PMLCmds</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;cmd.show(&quot;cartoon&quot;, &quot;</span><span class="si">%s</span><span class="s2">&quot;)&quot;&quot;&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">Name</span><span class="p">))</span>
+ 1373     <span class="n">PMLCmds</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;util.cba(33, &quot;</span><span class="si">%s</span><span class="s2">&quot;, _self = cmd)&quot;&quot;&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">Name</span><span class="p">))</span>
+ 1374     <span class="n">PMLCmds</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;cmd.show(&quot;sticks&quot;, &quot;(organic and (</span><span class="si">%s</span><span class="s2">))&quot;)&quot;&quot;&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">Name</span><span class="p">))</span>
+ 1375     <span class="k">if</span> <span class="n">ShowSolvent</span><span class="p">:</span>
+ 1376         <span class="n">PMLCmds</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;cmd.show(&quot;nonbonded&quot;, &quot;(solvent and (</span><span class="si">%s</span><span class="s2">))&quot;)&quot;&quot;&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">Name</span><span class="p">))</span>
+ 1377     <span class="k">if</span> <span class="n">ShowInorganic</span><span class="p">:</span>
+ 1378         <span class="n">PMLCmds</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;cmd.show(&quot;nonbonded&quot;, &quot;(inorganic and (</span><span class="si">%s</span><span class="s2">))&quot;)&quot;&quot;&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">Name</span><span class="p">))</span>
+ 1379     
+ 1380     <span class="k">if</span> <span class="n">ShowLines</span><span class="p">:</span>
+ 1381         <span class="n">PMLCmds</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;cmd.show(&quot;lines&quot;, &quot;</span><span class="si">%s</span><span class="s2">&quot;)&quot;&quot;&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">Name</span><span class="p">))</span>
+ 1382     <span class="k">else</span><span class="p">:</span>
+ 1383         <span class="k">if</span> <span class="n">ShowInorganic</span><span class="p">:</span>
+ 1384             <span class="n">PMLCmds</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;cmd.show(&quot;lines&quot;, &quot;(inorganic and (</span><span class="si">%s</span><span class="s2">))&quot;)&quot;&quot;&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">Name</span><span class="p">))</span>
+ 1385     
+ 1386     <span class="n">PMLCmds</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;cmd.set_bond(&quot;valence&quot;, &quot;1&quot;, &quot;</span><span class="si">%s</span><span class="s2">&quot;, quiet = 1)&quot;&quot;&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">Name</span><span class="p">))</span>
+ 1387     <span class="n">PMLCmds</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">SetupPMLForEnableDisable</span><span class="p">(</span><span class="n">Name</span><span class="p">,</span> <span class="n">Enable</span><span class="p">))</span>
+ 1388 
+ 1389     <span class="n">PML</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">PMLCmds</span><span class="p">)</span>
+ 1390     
+ 1391     <span class="k">return</span> <span class="n">PML</span>
+</pre>
+<br />
+<center>
+<img src="../../../images/h2o2.png">
+</center>
+</body>
+</html>

@@ -1,0 +1,665 @@
+<html>
+<head>
+<title>MayaChemTools:Code:PyMOLInfoMacromolecules.py</title>
+<meta http-equiv="content-type" content="text/html;charset=utf-8">
+<link rel="stylesheet" type="text/css" href="../../../css/MayaChemToolsPythonCode.css">
+</head>
+<body leftmargin="20" rightmargin="20" topmargin="10" bottommargin="10">
+<br/>
+<center>
+<a href="http://www.mayachemtools.org" title="MayaChemTools Home"><img src="../../../images/MayaChemToolsLogo.gif" border="0" alt="MayaChemTools"></a>
+</center>
+<br/>
+<pre>
+   1 <span class="ch">#!/bin/env python</span>
+   2 <span class="c1">#</span>
+   3 <span class="c1"># File: PyMOLInfoMacromolecules.py</span>
+   4 <span class="c1"># Author: Manish Sud &lt;msud@san.rr.com&gt;</span>
+   5 <span class="c1">#</span>
+   6 <span class="c1"># Copyright (C) 2018 Manish Sud. All rights reserved.</span>
+   7 <span class="c1">#</span>
+   8 <span class="c1"># The functionality available in this script is implemented using PyMOL, a</span>
+   9 <span class="c1"># molecular visualization system on an open source foundation originally</span>
+  10 <span class="c1"># developed by Warren DeLano.</span>
+  11 <span class="c1">#</span>
+  12 <span class="c1"># This file is part of MayaChemTools.</span>
+  13 <span class="c1">#</span>
+  14 <span class="c1"># MayaChemTools is free software; you can redistribute it and/or modify it under</span>
+  15 <span class="c1"># the terms of the GNU Lesser General Public License as published by the Free</span>
+  16 <span class="c1"># Software Foundation; either version 3 of the License, or (at your option) any</span>
+  17 <span class="c1"># later version.</span>
+  18 <span class="c1">#</span>
+  19 <span class="c1"># MayaChemTools is distributed in the hope that it will be useful, but without</span>
+  20 <span class="c1"># any warranty; without even the implied warranty of merchantability of fitness</span>
+  21 <span class="c1"># for a particular purpose.  See the GNU Lesser General Public License for more</span>
+  22 <span class="c1"># details.</span>
+  23 <span class="c1">#</span>
+  24 <span class="c1"># You should have received a copy of the GNU Lesser General Public License</span>
+  25 <span class="c1"># along with MayaChemTools; if not, see &lt;http://www.gnu.org/licenses/&gt; or</span>
+  26 <span class="c1"># write to the Free Software Foundation Inc., 59 Temple Place, Suite 330,</span>
+  27 <span class="c1"># Boston, MA, 02111-1307, USA.</span>
+  28 <span class="c1">#</span>
+  29 
+  30 <span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">print_function</span>
+  31 
+  32 <span class="c1"># Add local python path to the global path and import standard library modules...</span>
+  33 <span class="kn">import</span> <span class="nn">os</span>
+  34 <span class="kn">import</span> <span class="nn">sys</span><span class="p">;</span>  <span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="s2">&quot;..&quot;</span><span class="p">,</span> <span class="s2">&quot;lib&quot;</span><span class="p">,</span> <span class="s2">&quot;Python&quot;</span><span class="p">))</span>
+  35 <span class="kn">import</span> <span class="nn">time</span>
+  36 <span class="kn">import</span> <span class="nn">re</span>
+  37 
+  38 <span class="c1"># PyMOL imports...</span>
+  39 <span class="k">try</span><span class="p">:</span>
+  40     <span class="kn">import</span> <span class="nn">pymol</span>
+  41     <span class="c1"># Finish launching PyMOL in  a command line mode for batch processing (-c)</span>
+  42     <span class="c1"># along with the following options:  disable loading of pymolrc and plugins (-k);</span>
+  43     <span class="c1"># suppress start up messages (-q)</span>
+  44     <span class="n">pymol</span><span class="o">.</span><span class="n">finish_launching</span><span class="p">([</span><span class="s1">&#39;pymol&#39;</span><span class="p">,</span> <span class="s1">&#39;-ckq&#39;</span><span class="p">])</span>
+  45 <span class="k">except</span> <span class="ne">ImportError</span> <span class="k">as</span> <span class="n">ErrMsg</span><span class="p">:</span>
+  46     <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Failed to import PyMOL module/package: </span><span class="si">%s</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">ErrMsg</span><span class="p">)</span>
+  47     <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;Check/update your PyMOL environment and try again.</span><span class="se">\n\n</span><span class="s2">&quot;</span><span class="p">)</span>
+  48     <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+  49 
+  50 <span class="c1"># MayaChemTools imports...</span>
+  51 <span class="k">try</span><span class="p">:</span>
+  52     <span class="kn">from</span> <span class="nn">docopt</span> <span class="kn">import</span> <span class="n">docopt</span>
+  53     <span class="kn">import</span> <span class="nn">MiscUtil</span>
+  54     <span class="kn">import</span> <span class="nn">PyMOLUtil</span>
+  55 <span class="k">except</span> <span class="ne">ImportError</span> <span class="k">as</span> <span class="n">ErrMsg</span><span class="p">:</span>
+  56     <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Failed to import MayaChemTools module/package: </span><span class="si">%s</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">ErrMsg</span><span class="p">)</span>
+  57     <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;Check/update your MayaChemTools environment and try again.</span><span class="se">\n\n</span><span class="s2">&quot;</span><span class="p">)</span>
+  58     <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+  59 
+  60 <span class="n">ScriptName</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+  61 <span class="n">Options</span> <span class="o">=</span> <span class="p">{}</span>
+  62 <span class="n">OptionsInfo</span> <span class="o">=</span> <span class="p">{}</span>
+  63 
+  64 <span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
+  65     <span class="sd">&quot;&quot;&quot;Start execution of the script&quot;&quot;&quot;</span>
+  66     
+  67     <span class="n">MiscUtil</span><span class="o">.</span><span class="n">PrintInfo</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="si">%s</span><span class="s2"> (PyMOL v</span><span class="si">%s</span><span class="s2">; </span><span class="si">%s</span><span class="s2">) Starting...</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">ScriptName</span><span class="p">,</span> <span class="n">pymol</span><span class="o">.</span><span class="n">cmd</span><span class="o">.</span><span class="n">get_version</span><span class="p">()[</span><span class="mi">1</span><span class="p">],</span> <span class="n">time</span><span class="o">.</span><span class="n">asctime</span><span class="p">()))</span>
+  68     
+  69     <span class="p">(</span><span class="n">WallClockTime</span><span class="p">,</span> <span class="n">ProcessorTime</span><span class="p">)</span> <span class="o">=</span> <span class="n">MiscUtil</span><span class="o">.</span><span class="n">GetWallClockAndProcessorTime</span><span class="p">()</span>
+  70     
+  71     <span class="c1"># Retrieve command line arguments and options...</span>
+  72     <span class="n">RetrieveOptions</span><span class="p">()</span>
+  73     
+  74     <span class="c1"># Process and validate command line arguments and options...</span>
+  75     <span class="n">ProcessOptions</span><span class="p">()</span>
+  76 
+  77     <span class="c1"># Perform actions required by the script...</span>
+  78     <span class="n">ListInfo</span><span class="p">()</span>
+  79     
+  80     <span class="n">MiscUtil</span><span class="o">.</span><span class="n">PrintInfo</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="si">%s</span><span class="s2">: Done...</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">ScriptName</span><span class="p">)</span>
+  81     <span class="n">MiscUtil</span><span class="o">.</span><span class="n">PrintInfo</span><span class="p">(</span><span class="s2">&quot;Total time: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">MiscUtil</span><span class="o">.</span><span class="n">GetFormattedElapsedTime</span><span class="p">(</span><span class="n">WallClockTime</span><span class="p">,</span> <span class="n">ProcessorTime</span><span class="p">))</span>
+  82 
+  83 <span class="k">def</span> <span class="nf">ListInfo</span><span class="p">():</span>
+  84     <span class="sd">&quot;&quot;&quot;List information for macromolecules.&quot;&quot;&quot;</span>
+  85 
+  86     <span class="k">for</span> <span class="n">Infile</span> <span class="ow">in</span> <span class="n">OptionsInfo</span><span class="p">[</span><span class="s2">&quot;InfilesNames&quot;</span><span class="p">]:</span>
+  87         <span class="n">MiscUtil</span><span class="o">.</span><span class="n">PrintInfo</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Processing file </span><span class="si">%s</span><span class="s2">...&quot;</span> <span class="o">%</span> <span class="n">Infile</span><span class="p">)</span>
+  88         <span class="n">ListFileInfo</span><span class="p">(</span><span class="n">Infile</span><span class="p">)</span>
+  89 
+  90 <span class="k">def</span> <span class="nf">ListFileInfo</span><span class="p">(</span><span class="n">Infile</span><span class="p">):</span>
+  91     <span class="sd">&quot;&quot;&quot;List information for macromolecules in a file.&quot;&quot;&quot;</span>
+  92     
+  93     <span class="n">FileDir</span><span class="p">,</span> <span class="n">FileName</span><span class="p">,</span> <span class="n">FileExt</span> <span class="o">=</span> <span class="n">MiscUtil</span><span class="o">.</span><span class="n">ParseFileName</span><span class="p">(</span><span class="n">Infile</span><span class="p">)</span>
+  94     <span class="n">MolName</span> <span class="o">=</span> <span class="n">FileName</span>
+  95 
+  96     <span class="c1"># Load infile...</span>
+  97     <span class="n">pymol</span><span class="o">.</span><span class="n">cmd</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">Infile</span><span class="p">,</span> <span class="n">MolName</span><span class="p">)</span>
+  98     
+  99     <span class="n">ChainIDs</span> <span class="o">=</span> <span class="n">PyMOLUtil</span><span class="o">.</span><span class="n">GetChains</span><span class="p">(</span><span class="n">MolName</span><span class="p">)</span>
+ 100     <span class="n">ListHeaderInfo</span><span class="p">(</span><span class="n">Infile</span><span class="p">)</span>
+ 101     
+ 102     <span class="n">ListChainsInfo</span><span class="p">(</span><span class="n">MolName</span><span class="p">,</span> <span class="n">ChainIDs</span><span class="p">)</span>
+ 103     <span class="n">ListChainsResiduesInfo</span><span class="p">(</span><span class="n">MolName</span><span class="p">,</span> <span class="n">ChainIDs</span><span class="p">)</span>
+ 104     
+ 105     <span class="n">ListLigandsInfo</span><span class="p">(</span><span class="n">MolName</span><span class="p">,</span> <span class="n">ChainIDs</span><span class="p">)</span>
+ 106     <span class="n">ListSolventsInfo</span><span class="p">(</span><span class="n">MolName</span><span class="p">,</span> <span class="n">ChainIDs</span><span class="p">)</span>
+ 107     <span class="n">ListInorganicsInfo</span><span class="p">(</span><span class="n">MolName</span><span class="p">,</span> <span class="n">ChainIDs</span><span class="p">)</span>
+ 108 
+ 109     <span class="n">ListPocketsInfo</span><span class="p">(</span><span class="n">MolName</span><span class="p">,</span> <span class="n">ChainIDs</span><span class="p">)</span>
+ 110 
+ 111     <span class="n">ListBoundingBoxInfo</span><span class="p">(</span><span class="n">MolName</span><span class="p">)</span>
+ 112     
+ 113     <span class="c1"># Delete infile object...</span>
+ 114     <span class="n">pymol</span><span class="o">.</span><span class="n">cmd</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="n">MolName</span><span class="p">)</span>
+ 115     
+ 116     <span class="n">ListFileSizeAndModificationInfo</span><span class="p">(</span><span class="n">Infile</span><span class="p">)</span>
+ 117 
+ 118 <span class="k">def</span> <span class="nf">ListHeaderInfo</span><span class="p">(</span><span class="n">Infile</span><span class="p">):</span>
+ 119     <span class="sd">&quot;&quot;&quot;List header information.&quot;&quot;&quot;</span>
+ 120 
+ 121     <span class="k">if</span> <span class="ow">not</span> <span class="n">OptionsInfo</span><span class="p">[</span><span class="s2">&quot;Header&quot;</span><span class="p">]:</span>
+ 122         <span class="k">return</span>
+ 123 
+ 124     <span class="n">FileDir</span><span class="p">,</span> <span class="n">FileName</span><span class="p">,</span> <span class="n">FileExt</span> <span class="o">=</span> <span class="n">MiscUtil</span><span class="o">.</span><span class="n">ParseFileName</span><span class="p">(</span><span class="n">Infile</span><span class="p">)</span>
+ 125 
+ 126     <span class="n">Classification</span><span class="p">,</span> <span class="n">DepositionDate</span><span class="p">,</span> <span class="n">IDCode</span><span class="p">,</span> <span class="n">ExperimentalTechnique</span><span class="p">,</span> <span class="n">Resolution</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;Not Available&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="mi">5</span>
+ 127     <span class="k">if</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="s2">&quot;^pdb$&quot;</span><span class="p">,</span> <span class="n">FileExt</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">I</span><span class="p">):</span>
+ 128          <span class="n">Classification</span><span class="p">,</span> <span class="n">DepositionDate</span><span class="p">,</span> <span class="n">IDCode</span><span class="p">,</span> <span class="n">ExperimentalTechnique</span><span class="p">,</span> <span class="n">Resolution</span> <span class="o">=</span> <span class="n">RetriveHeadAndExperimentalInfoFromPDBFile</span><span class="p">(</span><span class="n">Infile</span><span class="p">)</span>
+ 129     <span class="k">elif</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="s2">&quot;^cif$&quot;</span><span class="p">,</span> <span class="n">FileExt</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">I</span><span class="p">):</span>
+ 130          <span class="n">Classification</span><span class="p">,</span> <span class="n">DepositionDate</span><span class="p">,</span> <span class="n">IDCode</span><span class="p">,</span> <span class="n">ExperimentalTechnique</span><span class="p">,</span> <span class="n">Resolution</span> <span class="o">=</span> <span class="n">RetriveHeadAndExperimentalInfoFromCIFFile</span><span class="p">(</span><span class="n">Infile</span><span class="p">)</span>
+ 131 
+ 132     <span class="n">MiscUtil</span><span class="o">.</span><span class="n">PrintInfo</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">ID: </span><span class="si">%s</span><span class="se">\n</span><span class="s2">Classification: </span><span class="si">%s</span><span class="se">\n</span><span class="s2">Desposition date: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">IDCode</span><span class="p">,</span> <span class="n">Classification</span><span class="p">,</span> <span class="n">DepositionDate</span><span class="p">))</span>
+ 133     <span class="n">MiscUtil</span><span class="o">.</span><span class="n">PrintInfo</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Experimental technique </span><span class="si">%s</span><span class="se">\n</span><span class="s2">Resolution: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">ExperimentalTechnique</span><span class="p">,</span> <span class="n">Resolution</span><span class="p">))</span>
+ 134 
+ 135 <span class="k">def</span> <span class="nf">RetriveHeadAndExperimentalInfoFromPDBFile</span><span class="p">(</span><span class="n">Infile</span><span class="p">):</span>
+ 136     <span class="sd">&quot;&quot;&quot;Retrieve header and experimental information from PDB file. &quot;&quot;&quot;</span>
+ 137 
+ 138     <span class="n">Classification</span><span class="p">,</span> <span class="n">DepositionDate</span><span class="p">,</span> <span class="n">IDCode</span><span class="p">,</span> <span class="n">ExperimentalTechnique</span><span class="p">,</span> <span class="n">Resolution</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;Not Available&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="mi">5</span>
+ 139 
+ 140     <span class="n">Lines</span> <span class="o">=</span> <span class="n">MiscUtil</span><span class="o">.</span><span class="n">GetTextLines</span><span class="p">(</span><span class="n">Infile</span><span class="p">)</span>
+ 141 
+ 142     <span class="c1"># Retrieve header info...</span>
+ 143     <span class="k">for</span> <span class="n">Line</span> <span class="ow">in</span> <span class="n">Lines</span><span class="p">:</span>
+ 144         <span class="k">if</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="s2">&quot;^HEADER&quot;</span><span class="p">,</span> <span class="n">Line</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">I</span><span class="p">):</span>
+ 145             <span class="c1"># Format: 10x40s9s3x4s</span>
+ 146             <span class="n">FormatSize</span> <span class="o">=</span> <span class="mi">66</span>
+ 147             <span class="n">Line</span> <span class="o">=</span> <span class="n">PrepareLineForFormatSize</span><span class="p">(</span><span class="n">Line</span><span class="p">,</span> <span class="n">FormatSize</span><span class="p">)</span>
+ 148             
+ 149             <span class="n">Classification</span> <span class="o">=</span> <span class="n">Line</span><span class="p">[</span><span class="mi">10</span><span class="p">:</span><span class="mi">50</span><span class="p">]</span>
+ 150             <span class="n">DepositionDate</span> <span class="o">=</span> <span class="n">Line</span><span class="p">[</span><span class="mi">50</span><span class="p">:</span><span class="mi">59</span><span class="p">]</span>
+ 151             <span class="n">IDCode</span> <span class="o">=</span> <span class="n">Line</span><span class="p">[</span><span class="mi">62</span><span class="p">:</span><span class="mi">66</span><span class="p">]</span>
+ 152             
+ 153             <span class="n">Classification</span> <span class="o">=</span> <span class="n">Classification</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">Classification</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span> <span class="k">else</span> <span class="s2">&quot;Not Available&quot;</span>
+ 154             <span class="n">DepositionDate</span> <span class="o">=</span> <span class="n">DepositionDate</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">DepositionDate</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span> <span class="k">else</span> <span class="s2">&quot;Not Available&quot;</span>
+ 155             <span class="n">IDCode</span> <span class="o">=</span> <span class="n">IDCode</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">IDCode</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span> <span class="k">else</span> <span class="s2">&quot;Not Available&quot;</span>
+ 156             
+ 157             <span class="k">break</span>
+ 158 
+ 159     <span class="c1"># Retrieve experimental info...</span>
+ 160     <span class="k">for</span> <span class="n">Line</span> <span class="ow">in</span> <span class="n">Lines</span><span class="p">:</span>
+ 161         <span class="k">if</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="s2">&quot;^EXPDTA&quot;</span><span class="p">,</span> <span class="n">Line</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">I</span><span class="p">):</span>
+ 162             <span class="n">ExperimentalTechnique</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s2">&quot;^EXPDTA&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">Line</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">I</span><span class="p">)</span>
+ 163             <span class="n">ExperimentalTechnique</span> <span class="o">=</span> <span class="n">ExperimentalTechnique</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+ 164         <span class="k">elif</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="s2">&quot;^REMARK   2 RESOLUTION.&quot;</span><span class="p">,</span> <span class="n">Line</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">I</span><span class="p">):</span>
+ 165             <span class="k">if</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="s2">&quot;NOT APPLICABLE&quot;</span><span class="p">,</span> <span class="n">Line</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">I</span><span class="p">):</span>
+ 166                 <span class="n">Resolution</span> <span class="o">=</span> <span class="s2">&quot;NOT APPLICABLE&quot;</span>
+ 167             <span class="k">else</span><span class="p">:</span>
+ 168                 <span class="n">FormatSize</span> <span class="o">=</span> <span class="mi">70</span>
+ 169                 <span class="n">Line</span> <span class="o">=</span> <span class="n">PrepareLineForFormatSize</span><span class="p">(</span><span class="n">Line</span><span class="p">,</span> <span class="n">FormatSize</span><span class="p">)</span>
+ 170                 <span class="n">Resolution</span> <span class="o">=</span> <span class="n">Line</span><span class="p">[</span><span class="mi">22</span><span class="p">:</span><span class="mi">70</span><span class="p">]</span>
+ 171                 <span class="n">Resolution</span> <span class="o">=</span> <span class="n">Resolution</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">Resolution</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span> <span class="k">else</span> <span class="s2">&quot;Not Available&quot;</span>
+ 172         <span class="k">elif</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="s2">&quot;^(ATOM|HETATM)&quot;</span><span class="p">,</span> <span class="n">Line</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">I</span><span class="p">):</span>
+ 173             <span class="k">break</span>
+ 174 
+ 175     <span class="k">return</span> <span class="n">Classification</span><span class="p">,</span> <span class="n">DepositionDate</span><span class="p">,</span> <span class="n">IDCode</span><span class="p">,</span> <span class="n">ExperimentalTechnique</span><span class="p">,</span> <span class="n">Resolution</span>
+ 176 
+ 177 <span class="k">def</span> <span class="nf">RetriveHeadAndExperimentalInfoFromCIFFile</span><span class="p">(</span><span class="n">Infile</span><span class="p">):</span>
+ 178     <span class="sd">&quot;&quot;&quot;Retrieve header information from CIF file. &quot;&quot;&quot;</span>
+ 179 
+ 180     <span class="n">Classification</span><span class="p">,</span> <span class="n">DepositionDate</span><span class="p">,</span> <span class="n">IDCode</span><span class="p">,</span> <span class="n">ExperimentalTechnique</span><span class="p">,</span> <span class="n">Resolution</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;Not Available&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="mi">5</span>
+ 181     
+ 182     <span class="n">Lines</span> <span class="o">=</span> <span class="n">MiscUtil</span><span class="o">.</span><span class="n">GetTextLines</span><span class="p">(</span><span class="n">Infile</span><span class="p">)</span>
+ 183     
+ 184     <span class="c1"># IDCode...</span>
+ 185     <span class="k">for</span> <span class="n">Line</span> <span class="ow">in</span> <span class="n">Lines</span><span class="p">:</span>
+ 186         <span class="k">if</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="s2">&quot;^_struct_keywords.entry_id&quot;</span><span class="p">,</span> <span class="n">Line</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">I</span><span class="p">):</span>
+ 187             <span class="n">IDCode</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s2">&quot;^_struct_keywords.entry_id&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">Line</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">I</span><span class="p">)</span>
+ 188             <span class="n">IDCode</span> <span class="o">=</span> <span class="n">IDCode</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">IDCode</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span> <span class="k">else</span> <span class="s2">&quot;Not Available&quot;</span>
+ 189             <span class="k">break</span>
+ 190 
+ 191     <span class="c1"># Classification...</span>
+ 192     <span class="k">for</span> <span class="n">Line</span> <span class="ow">in</span> <span class="n">Lines</span><span class="p">:</span>
+ 193         <span class="k">if</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="s2">&quot;^_struct_keywords.pdbx_keywords&quot;</span><span class="p">,</span> <span class="n">Line</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">I</span><span class="p">):</span>
+ 194             <span class="n">Classification</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s2">&quot;^_struct_keywords.pdbx_keywords&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">Line</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">I</span><span class="p">)</span>
+ 195             <span class="n">Classification</span> <span class="o">=</span> <span class="n">Classification</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">Classification</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span> <span class="k">else</span> <span class="s2">&quot;Not Available&quot;</span>
+ 196             <span class="k">break</span>
+ 197     
+ 198     <span class="c1"># Deposition date...</span>
+ 199     <span class="k">for</span> <span class="n">Line</span> <span class="ow">in</span> <span class="n">Lines</span><span class="p">:</span>
+ 200         <span class="k">if</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="s2">&quot;^_pdbx_database_status.recvd_initial_deposition_date&quot;</span><span class="p">,</span> <span class="n">Line</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">I</span><span class="p">):</span>
+ 201             <span class="n">DepositionDate</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s2">&quot;^_pdbx_database_status.recvd_initial_deposition_date&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">Line</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">I</span><span class="p">)</span>
+ 202             <span class="n">DepositionDate</span> <span class="o">=</span> <span class="n">DepositionDate</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">DepositionDate</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span> <span class="k">else</span> <span class="s2">&quot;Not Available&quot;</span>
+ 203             <span class="k">break</span>
+ 204     
+ 205     <span class="c1"># Experimental technique...</span>
+ 206     <span class="k">for</span> <span class="n">Line</span> <span class="ow">in</span> <span class="n">Lines</span><span class="p">:</span>
+ 207         <span class="k">if</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="s2">&quot;^_exptl.method&quot;</span><span class="p">,</span> <span class="n">Line</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">I</span><span class="p">):</span>
+ 208             <span class="n">ExperimentalTechnique</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s2">&quot;(_exptl.method|&#39;)&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">Line</span><span class="p">,</span> <span class="n">flags</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">I</span><span class="p">)</span>
+ 209             <span class="n">ExperimentalTechnique</span> <span class="o">=</span> <span class="n">ExperimentalTechnique</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">ExperimentalTechnique</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span> <span class="k">else</span> <span class="s2">&quot;Not Available&quot;</span>
+ 210             <span class="k">break</span>
+ 211         
+ 212     <span class="c1"># Resolution...</span>
+ 213     <span class="k">for</span> <span class="n">Line</span> <span class="ow">in</span> <span class="n">Lines</span><span class="p">:</span>
+ 214         <span class="k">if</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="s2">&quot;^_reflns.d_resolution_high&quot;</span><span class="p">,</span> <span class="n">Line</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">I</span><span class="p">):</span>
+ 215             <span class="n">Resolution</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s2">&quot;^_reflns.d_resolution_high&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">Line</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">I</span><span class="p">)</span>
+ 216             <span class="n">Resolution</span> <span class="o">=</span> <span class="n">Resolution</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">Resolution</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span> <span class="k">else</span> <span class="s2">&quot;Not Available&quot;</span>
+ 217             <span class="k">break</span>
+ 218         
+ 219     <span class="k">return</span> <span class="n">Classification</span><span class="p">,</span> <span class="n">DepositionDate</span><span class="p">,</span> <span class="n">IDCode</span><span class="p">,</span> <span class="n">ExperimentalTechnique</span><span class="p">,</span> <span class="n">Resolution</span>
+ 220 
+ 221 <span class="k">def</span> <span class="nf">PrepareLineForFormatSize</span><span class="p">(</span><span class="n">Text</span><span class="p">,</span> <span class="n">FormatSize</span><span class="p">):</span>
+ 222     <span class="sd">&quot;&quot;&quot;Prepare text string for format size padding or truncation to</span>
+ 223 <span class="sd">    alter its size.</span>
+ 224 <span class="sd">    &quot;&quot;&quot;</span>
+ 225 
+ 226     <span class="n">TextLen</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">Text</span><span class="p">)</span>
+ 227     <span class="k">if</span> <span class="n">TextLen</span> <span class="o">&lt;</span> <span class="n">FormatSize</span><span class="p">:</span>
+ 228         <span class="n">PaddingLen</span> <span class="o">=</span> <span class="n">FormatSize</span> <span class="o">-</span> <span class="n">TextLen</span>
+ 229         <span class="n">TextPadding</span> <span class="o">=</span> <span class="s2">&quot; &quot;</span> <span class="o">*</span> <span class="n">PaddingLen</span>
+ 230         <span class="n">Text</span> <span class="o">=</span> <span class="n">Text</span> <span class="o">+</span> <span class="n">TextPadding</span>
+ 231     <span class="k">elif</span> <span class="n">TextLen</span> <span class="o">&gt;</span> <span class="n">FormatSize</span><span class="p">:</span>
+ 232         <span class="n">Text</span> <span class="o">=</span> <span class="n">Text</span><span class="p">[:</span><span class="n">FormatSize</span><span class="p">]</span>
+ 233     
+ 234     <span class="k">return</span> <span class="n">Text</span>
+ 235 
+ 236 <span class="k">def</span> <span class="nf">ListChainsInfo</span><span class="p">(</span><span class="n">MolName</span><span class="p">,</span> <span class="n">ChainIDs</span><span class="p">):</span>
+ 237     <span class="sd">&quot;&quot;&quot;List chains information across all chains.&quot;&quot;&quot;</span>
+ 238 
+ 239     <span class="k">if</span> <span class="ow">not</span> <span class="n">OptionsInfo</span><span class="p">[</span><span class="s2">&quot;Chains&quot;</span><span class="p">]:</span>
+ 240         <span class="k">return</span>
+ 241 
+ 242     <span class="n">ChainsInfo</span> <span class="o">=</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">ChainIDs</span><span class="p">)</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">ChainIDs</span><span class="p">)</span> <span class="k">else</span> <span class="s2">&quot;None&quot;</span>
+ 243 
+ 244     <span class="n">MiscUtil</span><span class="o">.</span><span class="n">PrintInfo</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Number of chains: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="nb">len</span><span class="p">(</span><span class="n">ChainIDs</span><span class="p">))</span>
+ 245     <span class="n">MiscUtil</span><span class="o">.</span><span class="n">PrintInfo</span><span class="p">(</span><span class="s2">&quot;ChainIDs: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">ChainsInfo</span><span class="p">)</span>
+ 246     
+ 247 <span class="k">def</span> <span class="nf">ListChainsResiduesInfo</span><span class="p">(</span><span class="n">MolName</span><span class="p">,</span> <span class="n">ChainIDs</span><span class="p">):</span>
+ 248     <span class="sd">&quot;&quot;&quot;List polymer chain residue information across all chains.&quot;&quot;&quot;</span>
+ 249     
+ 250     <span class="k">if</span> <span class="ow">not</span> <span class="n">OptionsInfo</span><span class="p">[</span><span class="s2">&quot;CountResidues&quot;</span><span class="p">]:</span>
+ 251         <span class="k">return</span>
+ 252     
+ 253     <span class="n">ListSelectionResiduesInfo</span><span class="p">(</span><span class="n">MolName</span><span class="p">,</span> <span class="n">ChainIDs</span><span class="p">,</span> <span class="s2">&quot;Chains&quot;</span><span class="p">)</span>
+ 254 
+ 255 <span class="k">def</span> <span class="nf">ListLigandsInfo</span><span class="p">(</span><span class="n">MolName</span><span class="p">,</span> <span class="n">ChainIDs</span><span class="p">):</span>
+ 256     <span class="sd">&quot;&quot;&quot;List ligand information across all chains.&quot;&quot;&quot;</span>
+ 257     
+ 258     <span class="k">if</span> <span class="ow">not</span> <span class="n">OptionsInfo</span><span class="p">[</span><span class="s2">&quot;Ligands&quot;</span><span class="p">]:</span>
+ 259         <span class="k">return</span>
+ 260     
+ 261     <span class="n">ListSelectionResiduesInfo</span><span class="p">(</span><span class="n">MolName</span><span class="p">,</span> <span class="n">ChainIDs</span><span class="p">,</span> <span class="s2">&quot;Ligands&quot;</span><span class="p">)</span>
+ 262 
+ 263 <span class="k">def</span> <span class="nf">ListSolventsInfo</span><span class="p">(</span><span class="n">MolName</span><span class="p">,</span> <span class="n">ChainIDs</span><span class="p">):</span>
+ 264     <span class="sd">&quot;&quot;&quot;List solvents information across all chains.&quot;&quot;&quot;</span>
+ 265     
+ 266     <span class="k">if</span> <span class="ow">not</span> <span class="n">OptionsInfo</span><span class="p">[</span><span class="s2">&quot;Solvents&quot;</span><span class="p">]:</span>
+ 267         <span class="k">return</span>
+ 268 
+ 269     <span class="n">ListSelectionResiduesInfo</span><span class="p">(</span><span class="n">MolName</span><span class="p">,</span> <span class="n">ChainIDs</span><span class="p">,</span> <span class="s2">&quot;Solvents&quot;</span><span class="p">)</span>
+ 270     
+ 271 <span class="k">def</span> <span class="nf">ListInorganicsInfo</span><span class="p">(</span><span class="n">MolName</span><span class="p">,</span> <span class="n">ChainIDs</span><span class="p">):</span>
+ 272     <span class="sd">&quot;&quot;&quot;List inorganics information across all chains.&quot;&quot;&quot;</span>
+ 273     
+ 274     <span class="k">if</span> <span class="ow">not</span> <span class="n">OptionsInfo</span><span class="p">[</span><span class="s2">&quot;Inorganics&quot;</span><span class="p">]:</span>
+ 275         <span class="k">return</span>
+ 276     
+ 277     <span class="n">ListSelectionResiduesInfo</span><span class="p">(</span><span class="n">MolName</span><span class="p">,</span> <span class="n">ChainIDs</span><span class="p">,</span> <span class="s2">&quot;Inorganics&quot;</span><span class="p">)</span>
+ 278 
+ 279 <span class="k">def</span> <span class="nf">ListSelectionResiduesInfo</span><span class="p">(</span><span class="n">MolName</span><span class="p">,</span> <span class="n">ChainIDs</span><span class="p">,</span> <span class="n">SelectionType</span><span class="p">):</span>
+ 280     <span class="sd">&quot;&quot;&quot;List residues information for a specified selection type. &quot;&quot;&quot;</span>
+ 281 
+ 282     <span class="n">Lines</span> <span class="o">=</span> <span class="p">[]</span>
+ 283     <span class="n">TotalResCount</span> <span class="o">=</span> <span class="mi">0</span>
+ 284     
+ 285     <span class="k">for</span> <span class="n">ChainID</span> <span class="ow">in</span> <span class="n">ChainIDs</span><span class="p">:</span>
+ 286         <span class="n">SelectionInfo</span><span class="p">,</span> <span class="n">SelectionLabel</span> <span class="o">=</span> <span class="n">GetSelectionResiduesInfo</span><span class="p">(</span><span class="n">MolName</span><span class="p">,</span> <span class="n">ChainID</span><span class="p">,</span> <span class="n">SelectionType</span><span class="p">)</span>
+ 287 
+ 288         <span class="n">ChainResCount</span> <span class="o">=</span> <span class="mi">0</span>
+ 289         <span class="n">LineWords</span> <span class="o">=</span> <span class="p">[]</span>
+ 290         
+ 291         <span class="n">SortedResNames</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">SelectionInfo</span><span class="p">[</span><span class="s2">&quot;ResNames&quot;</span><span class="p">],</span> <span class="n">key</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">ResName</span><span class="p">:</span> <span class="n">SelectionInfo</span><span class="p">[</span><span class="s2">&quot;ResCount&quot;</span><span class="p">][</span><span class="n">ResName</span><span class="p">],</span> <span class="n">reverse</span> <span class="o">=</span> <span class="bp">True</span><span class="p">)</span>
+ 292         <span class="k">for</span> <span class="n">ResName</span> <span class="ow">in</span> <span class="n">SortedResNames</span><span class="p">:</span>
+ 293             <span class="n">ResCount</span> <span class="o">=</span> <span class="n">SelectionInfo</span><span class="p">[</span><span class="s2">&quot;ResCount&quot;</span><span class="p">][</span><span class="n">ResName</span><span class="p">]</span>
+ 294             <span class="n">LineWords</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2"> - </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">ResName</span><span class="p">,</span> <span class="n">ResCount</span><span class="p">))</span>
+ 295 
+ 296             <span class="n">ChainResCount</span> <span class="o">+=</span> <span class="n">ResCount</span>
+ 297             <span class="n">TotalResCount</span> <span class="o">+=</span> <span class="n">ResCount</span>
+ 298         
+ 299         <span class="n">Line</span> <span class="o">=</span> <span class="s2">&quot;; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">LineWords</span><span class="p">)</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">LineWords</span><span class="p">)</span> <span class="k">else</span> <span class="bp">None</span>
+ 300         <span class="n">Lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;Chain ID: </span><span class="si">%s</span><span class="s2">; Count: </span><span class="si">%s</span><span class="s2">; Names:  </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">ChainID</span><span class="p">,</span> <span class="n">ChainResCount</span><span class="p">,</span> <span class="n">Line</span><span class="p">))</span>
+ 301     
+ 302     <span class="n">MiscUtil</span><span class="o">.</span><span class="n">PrintInfo</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Number of </span><span class="si">%s</span><span class="s2"> residues: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">SelectionLabel</span><span class="p">,</span> <span class="n">TotalResCount</span><span class="p">))</span>
+ 303     <span class="k">for</span> <span class="n">Line</span> <span class="ow">in</span> <span class="n">Lines</span><span class="p">:</span>
+ 304         <span class="n">MiscUtil</span><span class="o">.</span><span class="n">PrintInfo</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">Line</span><span class="p">)</span>
+ 305 
+ 306 <span class="k">def</span> <span class="nf">GetSelectionResiduesInfo</span><span class="p">(</span><span class="n">MolName</span><span class="p">,</span> <span class="n">ChainID</span><span class="p">,</span> <span class="n">SelectionType</span><span class="p">):</span>
+ 307     <span class="sd">&quot;&quot;&quot;Get residues info for a specified selection type. &quot;&quot;&quot;</span>
+ 308 
+ 309     <span class="n">SelectionInfo</span> <span class="o">=</span> <span class="bp">None</span>
+ 310     <span class="n">SelectionLabel</span> <span class="o">=</span> <span class="bp">None</span>
+ 311     
+ 312     <span class="k">if</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="s2">&quot;^Ligands$&quot;</span><span class="p">,</span> <span class="n">SelectionType</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">I</span><span class="p">):</span>
+ 313         <span class="n">SelectionLabel</span> <span class="o">=</span> <span class="s2">&quot;ligand&quot;</span>
+ 314         <span class="n">SelectionInfo</span> <span class="o">=</span> <span class="n">PyMOLUtil</span><span class="o">.</span><span class="n">GetLigandResiduesInfo</span><span class="p">(</span><span class="n">MolName</span><span class="p">,</span> <span class="n">ChainID</span><span class="p">)</span>
+ 315     <span class="k">elif</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="s2">&quot;^Solvents$&quot;</span><span class="p">,</span> <span class="n">SelectionType</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">I</span><span class="p">):</span>
+ 316         <span class="n">SelectionLabel</span> <span class="o">=</span> <span class="s2">&quot;solvent&quot;</span>
+ 317         <span class="n">SelectionInfo</span> <span class="o">=</span> <span class="n">PyMOLUtil</span><span class="o">.</span><span class="n">GetSolventResiduesInfo</span><span class="p">(</span><span class="n">MolName</span><span class="p">,</span> <span class="n">ChainID</span><span class="p">)</span>
+ 318     <span class="k">elif</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="s2">&quot;^Inorganics$&quot;</span><span class="p">,</span> <span class="n">SelectionType</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">I</span><span class="p">):</span>
+ 319         <span class="n">SelectionLabel</span> <span class="o">=</span> <span class="s2">&quot;inorganic&quot;</span>
+ 320         <span class="n">SelectionInfo</span> <span class="o">=</span> <span class="n">PyMOLUtil</span><span class="o">.</span><span class="n">GetInorganicResiduesInfo</span><span class="p">(</span><span class="n">MolName</span><span class="p">,</span> <span class="n">ChainID</span><span class="p">)</span>
+ 321     <span class="k">elif</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="s2">&quot;^Chains$&quot;</span><span class="p">,</span> <span class="n">SelectionType</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">I</span><span class="p">):</span>
+ 322         <span class="n">SelectionLabel</span> <span class="o">=</span> <span class="s2">&quot;polymer chain&quot;</span>
+ 323         <span class="n">SelectionInfo</span> <span class="o">=</span> <span class="n">PyMOLUtil</span><span class="o">.</span><span class="n">GetPolymerResiduesInfo</span><span class="p">(</span><span class="n">MolName</span><span class="p">,</span> <span class="n">ChainID</span><span class="p">)</span>
+ 324     <span class="k">else</span><span class="p">:</span>
+ 325         <span class="n">MiscUtil</span><span class="o">.</span><span class="n">PrintError</span><span class="p">(</span><span class="s2">&quot;Failed to retrieve residues information: Selection type </span><span class="si">%s</span><span class="s2"> is not valid...&quot;</span> <span class="o">%</span> <span class="n">SelectionType</span><span class="p">)</span>
+ 326 
+ 327     <span class="k">return</span> <span class="n">SelectionInfo</span><span class="p">,</span> <span class="n">SelectionLabel</span>
+ 328 
+ 329 <span class="k">def</span> <span class="nf">ListPocketsInfo</span><span class="p">(</span><span class="n">MolName</span><span class="p">,</span> <span class="n">ChainIDs</span><span class="p">):</span>
+ 330     <span class="sd">&quot;&quot;&quot;List pockect residues information across all chains.&quot;&quot;&quot;</span>
+ 331     
+ 332     <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">OptionsInfo</span><span class="p">[</span><span class="s2">&quot;PocketLigands&quot;</span><span class="p">]</span> <span class="ow">or</span> <span class="n">OptionsInfo</span><span class="p">[</span><span class="s2">&quot;PocketSolvents&quot;</span><span class="p">]</span> <span class="ow">or</span> <span class="n">OptionsInfo</span><span class="p">[</span><span class="s2">&quot;PocketInorganics&quot;</span><span class="p">])</span> <span class="p">:</span>
+ 333         <span class="k">return</span>
+ 334     
+ 335     <span class="k">for</span> <span class="n">ChainID</span> <span class="ow">in</span> <span class="n">ChainIDs</span><span class="p">:</span>
+ 336         <span class="n">MiscUtil</span><span class="o">.</span><span class="n">PrintInfo</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Listing ligand pockets information for chain </span><span class="si">%s</span><span class="s2">...&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">ChainID</span><span class="p">))</span>
+ 337         
+ 338         <span class="n">LigandsInfo</span> <span class="o">=</span> <span class="n">PyMOLUtil</span><span class="o">.</span><span class="n">GetLigandResiduesInfo</span><span class="p">(</span><span class="n">MolName</span><span class="p">,</span> <span class="n">ChainID</span><span class="p">)</span>
+ 339         <span class="k">if</span> <span class="ow">not</span> <span class="nb">len</span><span class="p">(</span><span class="n">LigandsInfo</span><span class="p">[</span><span class="s2">&quot;ResNames&quot;</span><span class="p">]):</span>
+ 340             <span class="n">MiscUtil</span><span class="o">.</span><span class="n">PrintInfo</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Number of residues in ligand pocket: None&quot;</span><span class="p">)</span>
+ 341             <span class="n">MiscUtil</span><span class="o">.</span><span class="n">PrintInfo</span><span class="p">(</span><span class="s2">&quot;Chain ID: </span><span class="si">%s</span><span class="s2">; Ligands: None&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">ChainID</span><span class="p">))</span>
+ 342             <span class="k">continue</span>
+ 343         
+ 344         <span class="k">for</span> <span class="n">LigandResName</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">LigandsInfo</span><span class="p">[</span><span class="s2">&quot;ResNames&quot;</span><span class="p">]):</span>
+ 345             <span class="k">for</span> <span class="n">LigandResNum</span> <span class="ow">in</span> <span class="n">LigandsInfo</span><span class="p">[</span><span class="s2">&quot;ResNum&quot;</span><span class="p">][</span><span class="n">LigandResName</span><span class="p">]:</span>
+ 346                 <span class="n">ListPocketsPolymerInfo</span><span class="p">(</span><span class="n">MolName</span><span class="p">,</span> <span class="n">ChainID</span><span class="p">,</span> <span class="n">LigandResName</span><span class="p">,</span> <span class="n">LigandResNum</span><span class="p">)</span>
+ 347                 <span class="n">ListPocketsSolventsInfo</span><span class="p">(</span><span class="n">MolName</span><span class="p">,</span> <span class="n">ChainID</span><span class="p">,</span> <span class="n">LigandResName</span><span class="p">,</span> <span class="n">LigandResNum</span><span class="p">)</span>
+ 348                 <span class="n">ListPocketsInorganicsInfo</span><span class="p">(</span><span class="n">MolName</span><span class="p">,</span> <span class="n">ChainID</span><span class="p">,</span> <span class="n">LigandResName</span><span class="p">,</span> <span class="n">LigandResNum</span><span class="p">)</span>
+ 349 
+ 350 <span class="k">def</span> <span class="nf">ListPocketsPolymerInfo</span><span class="p">(</span><span class="n">MolName</span><span class="p">,</span> <span class="n">ChainID</span><span class="p">,</span> <span class="n">LigandResName</span><span class="p">,</span> <span class="n">LigandResNum</span><span class="p">):</span>
+ 351     <span class="sd">&quot;&quot;&quot;List pockect residues information across all chains.&quot;&quot;&quot;</span>
+ 352     
+ 353     <span class="k">if</span> <span class="ow">not</span> <span class="n">OptionsInfo</span><span class="p">[</span><span class="s2">&quot;PocketLigands&quot;</span><span class="p">]:</span>
+ 354         <span class="k">return</span>
+ 355     
+ 356     <span class="n">ListPocketSelectionResiduesInfo</span><span class="p">(</span><span class="n">MolName</span><span class="p">,</span> <span class="n">ChainID</span><span class="p">,</span> <span class="n">LigandResName</span><span class="p">,</span> <span class="n">LigandResNum</span><span class="p">,</span> <span class="s2">&quot;Pockets&quot;</span><span class="p">)</span>
+ 357 
+ 358 <span class="k">def</span> <span class="nf">ListPocketsSolventsInfo</span><span class="p">(</span><span class="n">MolName</span><span class="p">,</span> <span class="n">ChainID</span><span class="p">,</span> <span class="n">LigandResName</span><span class="p">,</span> <span class="n">LigandResNum</span><span class="p">):</span>
+ 359     <span class="sd">&quot;&quot;&quot;List pockect solvent residues information across all chains.&quot;&quot;&quot;</span>
+ 360     
+ 361     <span class="k">if</span> <span class="ow">not</span> <span class="n">OptionsInfo</span><span class="p">[</span><span class="s2">&quot;PocketSolvents&quot;</span><span class="p">]:</span>
+ 362         <span class="k">return</span>
+ 363     
+ 364     <span class="n">ListPocketSelectionResiduesInfo</span><span class="p">(</span><span class="n">MolName</span><span class="p">,</span> <span class="n">ChainID</span><span class="p">,</span> <span class="n">LigandResName</span><span class="p">,</span> <span class="n">LigandResNum</span><span class="p">,</span> <span class="s2">&quot;PocketSolvents&quot;</span><span class="p">)</span>
+ 365 
+ 366 <span class="k">def</span> <span class="nf">ListPocketsInorganicsInfo</span><span class="p">(</span><span class="n">MolName</span><span class="p">,</span> <span class="n">ChainID</span><span class="p">,</span> <span class="n">LigandResName</span><span class="p">,</span> <span class="n">LigandResNum</span><span class="p">):</span>
+ 367     <span class="sd">&quot;&quot;&quot;List pockect inorganic residues information across all chains.&quot;&quot;&quot;</span>
+ 368     
+ 369     <span class="k">if</span> <span class="ow">not</span> <span class="n">OptionsInfo</span><span class="p">[</span><span class="s2">&quot;PocketInorganics&quot;</span><span class="p">]:</span>
+ 370         <span class="k">return</span>
+ 371     
+ 372     <span class="n">ListPocketSelectionResiduesInfo</span><span class="p">(</span><span class="n">MolName</span><span class="p">,</span> <span class="n">ChainID</span><span class="p">,</span> <span class="n">LigandResName</span><span class="p">,</span> <span class="n">LigandResNum</span><span class="p">,</span> <span class="s2">&quot;PocketInorganics&quot;</span><span class="p">)</span>
+ 373 
+ 374 <span class="k">def</span> <span class="nf">ListPocketSelectionResiduesInfo</span><span class="p">(</span><span class="n">MolName</span><span class="p">,</span> <span class="n">ChainID</span><span class="p">,</span> <span class="n">LigandResName</span><span class="p">,</span> <span class="n">LigandResNum</span><span class="p">,</span> <span class="n">SelectionType</span><span class="p">):</span>
+ 375     <span class="sd">&quot;&quot;&quot;List residues information for a specified pocket selection type. &quot;&quot;&quot;</span>
+ 376 
+ 377     <span class="n">PocketDistanceCutoff</span>  <span class="o">=</span> <span class="n">OptionsInfo</span><span class="p">[</span><span class="s2">&quot;PocketDistanceCutoff&quot;</span><span class="p">]</span>
+ 378     <span class="n">SelectionLabel</span> <span class="o">=</span> <span class="n">GetPocketSelectionResiduesInfoLabel</span><span class="p">(</span><span class="n">SelectionType</span><span class="p">)</span>
+ 379     
+ 380     <span class="n">SelectionInfo</span> <span class="o">=</span> <span class="n">GetPocketSelectionResiduesInfo</span><span class="p">(</span><span class="n">MolName</span><span class="p">,</span> <span class="n">ChainID</span><span class="p">,</span> <span class="n">LigandResName</span><span class="p">,</span> <span class="n">LigandResNum</span><span class="p">,</span> <span class="n">PocketDistanceCutoff</span><span class="p">,</span> <span class="n">SelectionType</span><span class="p">)</span>
+ 381             
+ 382     <span class="c1"># Setup distribution of residues in the pocket...</span>
+ 383     <span class="n">LineWords</span> <span class="o">=</span> <span class="p">[]</span>
+ 384     <span class="n">PocketResCount</span> <span class="o">=</span> <span class="mi">0</span>
+ 385     <span class="n">SortedResNames</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">SelectionInfo</span><span class="p">[</span><span class="s2">&quot;ResNames&quot;</span><span class="p">],</span> <span class="n">key</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">ResName</span><span class="p">:</span> <span class="n">SelectionInfo</span><span class="p">[</span><span class="s2">&quot;ResCount&quot;</span><span class="p">][</span><span class="n">ResName</span><span class="p">],</span> <span class="n">reverse</span> <span class="o">=</span> <span class="bp">True</span><span class="p">)</span>
+ 386     <span class="k">for</span> <span class="n">ResName</span> <span class="ow">in</span> <span class="n">SortedResNames</span><span class="p">:</span>
+ 387         <span class="n">ResCount</span> <span class="o">=</span> <span class="n">SelectionInfo</span><span class="p">[</span><span class="s2">&quot;ResCount&quot;</span><span class="p">][</span><span class="n">ResName</span><span class="p">]</span>
+ 388         <span class="n">LineWords</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2"> - </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">ResName</span><span class="p">,</span> <span class="n">ResCount</span><span class="p">))</span>
+ 389         <span class="n">PocketResCount</span> <span class="o">+=</span> <span class="n">ResCount</span>
+ 390     
+ 391     <span class="n">ResidueDistribution</span> <span class="o">=</span> <span class="s2">&quot;; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">LineWords</span><span class="p">)</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">LineWords</span><span class="p">)</span> <span class="k">else</span> <span class="bp">None</span>
+ 392     
+ 393     <span class="c1"># Setup residue IDs sorted by residue numbers...</span>
+ 394     <span class="n">ResNumMap</span> <span class="o">=</span> <span class="p">{}</span>
+ 395     <span class="k">for</span> <span class="n">ResName</span> <span class="ow">in</span> <span class="n">SelectionInfo</span><span class="p">[</span><span class="s2">&quot;ResNames&quot;</span><span class="p">]:</span>
+ 396         <span class="k">for</span> <span class="n">ResNum</span> <span class="ow">in</span> <span class="n">SelectionInfo</span><span class="p">[</span><span class="s2">&quot;ResNum&quot;</span><span class="p">][</span><span class="n">ResName</span><span class="p">]:</span>
+ 397             <span class="n">ResNumMap</span><span class="p">[</span><span class="n">ResNum</span><span class="p">]</span> <span class="o">=</span> <span class="n">ResName</span>
+ 398     
+ 399     <span class="n">LineWords</span> <span class="o">=</span> <span class="p">[]</span>
+ 400     <span class="k">for</span> <span class="n">ResNum</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">ResNumMap</span><span class="p">,</span> <span class="n">key</span> <span class="o">=</span> <span class="nb">int</span><span class="p">):</span>
+ 401         <span class="n">ResName</span> <span class="o">=</span> <span class="n">ResNumMap</span><span class="p">[</span><span class="n">ResNum</span><span class="p">]</span>
+ 402         <span class="n">ResID</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">%s</span><span class="s2">_</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">ResName</span><span class="p">,</span> <span class="n">ResNum</span><span class="p">)</span>
+ 403         <span class="n">LineWords</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ResID</span><span class="p">)</span>
+ 404     <span class="n">ResidueIDs</span> <span class="o">=</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">LineWords</span><span class="p">)</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">LineWords</span><span class="p">)</span> <span class="k">else</span> <span class="bp">None</span>
+ 405                 
+ 406     <span class="n">MiscUtil</span><span class="o">.</span><span class="n">PrintInfo</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Number of </span><span class="si">%s</span><span class="s2"> residues in ligand pocket: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">SelectionLabel</span><span class="p">,</span> <span class="n">PocketResCount</span><span class="p">))</span>
+ 407     <span class="n">MiscUtil</span><span class="o">.</span><span class="n">PrintInfo</span><span class="p">(</span><span class="s2">&quot;Chain ID: </span><span class="si">%s</span><span class="s2">; Ligand ID: </span><span class="si">%s</span><span class="s2">_</span><span class="si">%s</span><span class="se">\n</span><span class="s2">Residue distribution: </span><span class="si">%s</span><span class="se">\n</span><span class="s2">Residue IDs: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">ChainID</span><span class="p">,</span> <span class="n">LigandResName</span><span class="p">,</span> <span class="n">LigandResNum</span><span class="p">,</span> <span class="n">ResidueDistribution</span><span class="p">,</span> <span class="n">ResidueIDs</span><span class="p">))</span>
+ 408 
+ 409 <span class="k">def</span> <span class="nf">GetPocketSelectionResiduesInfo</span><span class="p">(</span><span class="n">MolName</span><span class="p">,</span> <span class="n">ChainID</span><span class="p">,</span> <span class="n">LigandResName</span><span class="p">,</span> <span class="n">LigandResNum</span><span class="p">,</span> <span class="n">PocketDistanceCutoff</span><span class="p">,</span> <span class="n">SelectionType</span><span class="p">):</span>
+ 410     <span class="sd">&quot;&quot;&quot;Get pocket residues info for a specified selection type. &quot;&quot;&quot;</span>
+ 411 
+ 412     <span class="n">SelectionInfo</span> <span class="o">=</span> <span class="bp">None</span>
+ 413     
+ 414     <span class="k">if</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="s2">&quot;^Pockets$&quot;</span><span class="p">,</span> <span class="n">SelectionType</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">I</span><span class="p">):</span>
+ 415         <span class="n">SelectionInfo</span> <span class="o">=</span> <span class="n">PyMOLUtil</span><span class="o">.</span><span class="n">GetPocketPolymerResiduesInfo</span><span class="p">(</span><span class="n">MolName</span><span class="p">,</span> <span class="n">ChainID</span><span class="p">,</span> <span class="n">LigandResName</span><span class="p">,</span> <span class="n">LigandResNum</span><span class="p">,</span> <span class="n">PocketDistanceCutoff</span><span class="p">)</span>
+ 416     <span class="k">elif</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="s2">&quot;^PocketSolvents$&quot;</span><span class="p">,</span> <span class="n">SelectionType</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">I</span><span class="p">):</span>
+ 417         <span class="n">SelectionInfo</span> <span class="o">=</span> <span class="n">PyMOLUtil</span><span class="o">.</span><span class="n">GetPocketSolventResiduesInfo</span><span class="p">(</span><span class="n">MolName</span><span class="p">,</span> <span class="n">ChainID</span><span class="p">,</span> <span class="n">LigandResName</span><span class="p">,</span> <span class="n">LigandResNum</span><span class="p">,</span> <span class="n">PocketDistanceCutoff</span><span class="p">)</span>
+ 418     <span class="k">elif</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="s2">&quot;^PocketInorganics$&quot;</span><span class="p">,</span> <span class="n">SelectionType</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">I</span><span class="p">):</span>
+ 419         <span class="n">SelectionInfo</span> <span class="o">=</span> <span class="n">PyMOLUtil</span><span class="o">.</span><span class="n">GetPocketInorganicResiduesInfo</span><span class="p">(</span><span class="n">MolName</span><span class="p">,</span> <span class="n">ChainID</span><span class="p">,</span> <span class="n">LigandResName</span><span class="p">,</span> <span class="n">LigandResNum</span><span class="p">,</span> <span class="n">PocketDistanceCutoff</span><span class="p">)</span>
+ 420     <span class="k">else</span><span class="p">:</span>
+ 421         <span class="n">MiscUtil</span><span class="o">.</span><span class="n">PrintError</span><span class="p">(</span><span class="s2">&quot;Failed to retrieve pocket residues information: Selection type </span><span class="si">%s</span><span class="s2"> is not valid...&quot;</span> <span class="o">%</span> <span class="n">SelectionType</span><span class="p">)</span>
+ 422 
+ 423     <span class="k">return</span> <span class="n">SelectionInfo</span>
+ 424 
+ 425 <span class="k">def</span> <span class="nf">ListBoundingBoxInfo</span><span class="p">(</span><span class="n">MolName</span><span class="p">):</span>
+ 426     <span class="sd">&quot;&quot;&quot;List bounding box information. &quot;&quot;&quot;</span>
+ 427     
+ 428     <span class="k">if</span> <span class="ow">not</span> <span class="n">OptionsInfo</span><span class="p">[</span><span class="s2">&quot;BoundingBox&quot;</span><span class="p">]:</span>
+ 429         <span class="k">return</span>
+ 430 
+ 431     <span class="n">MolSelection</span> <span class="o">=</span> <span class="s2">&quot;(</span><span class="si">%s</span><span class="s2">)&quot;</span> <span class="o">%</span> <span class="n">MolName</span>
+ 432     <span class="n">MolExtents</span> <span class="o">=</span> <span class="n">pymol</span><span class="o">.</span><span class="n">cmd</span><span class="o">.</span><span class="n">get_extent</span><span class="p">(</span><span class="n">MolSelection</span><span class="p">)</span>
+ 433     
+ 434     <span class="n">XMin</span><span class="p">,</span> <span class="n">YMin</span><span class="p">,</span> <span class="n">ZMin</span> <span class="o">=</span> <span class="n">MolExtents</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+ 435     <span class="n">XMax</span><span class="p">,</span> <span class="n">YMax</span><span class="p">,</span> <span class="n">ZMax</span> <span class="o">=</span> <span class="n">MolExtents</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+ 436 
+ 437     <span class="n">XSize</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">XMax</span> <span class="o">-</span> <span class="n">XMin</span><span class="p">)</span>
+ 438     <span class="n">YSize</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">YMax</span> <span class="o">-</span> <span class="n">YMin</span><span class="p">)</span>
+ 439     <span class="n">ZSize</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">ZMax</span> <span class="o">-</span> <span class="n">ZMin</span><span class="p">)</span>
+ 440 
+ 441     <span class="n">MiscUtil</span><span class="o">.</span><span class="n">PrintInfo</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Bounding box coordinates: &lt;XMin, XMax&gt; - &lt;</span><span class="si">%.3f</span><span class="s2">, </span><span class="si">%.3f</span><span class="s2">&gt;; &lt;YMin, YMax&gt; - &lt;</span><span class="si">%.3f</span><span class="s2">, </span><span class="si">%.3f</span><span class="s2">&gt;; &lt;ZMin, ZMax&gt; - &lt;</span><span class="si">%.3f</span><span class="s2">, </span><span class="si">%.3f</span><span class="s2">&gt;&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">XMin</span><span class="p">,</span> <span class="n">XMax</span><span class="p">,</span> <span class="n">YMin</span><span class="p">,</span> <span class="n">YMax</span><span class="p">,</span> <span class="n">ZMin</span><span class="p">,</span> <span class="n">ZMax</span><span class="p">))</span>
+ 442     <span class="n">MiscUtil</span><span class="o">.</span><span class="n">PrintInfo</span><span class="p">(</span><span class="s2">&quot;Bounding box size in angstroms: XSize - </span><span class="si">%.3f</span><span class="s2">; YSize - </span><span class="si">%.3f</span><span class="s2">; ZSize - </span><span class="si">%.3f</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">XSize</span><span class="p">,</span> <span class="n">YSize</span><span class="p">,</span> <span class="n">ZSize</span><span class="p">))</span>
+ 443     
+ 444 <span class="k">def</span> <span class="nf">ListFileSizeAndModificationInfo</span><span class="p">(</span><span class="n">Infile</span><span class="p">):</span>
+ 445     <span class="sd">&quot;&quot;&quot;List file size and modification time info.&quot;&quot;&quot;</span>
+ 446 
+ 447     <span class="n">MiscUtil</span><span class="o">.</span><span class="n">PrintInfo</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">File size: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">MiscUtil</span><span class="o">.</span><span class="n">GetFormattedFileSize</span><span class="p">(</span><span class="n">Infile</span><span class="p">))</span>
+ 448     <span class="n">MiscUtil</span><span class="o">.</span><span class="n">PrintInfo</span><span class="p">(</span><span class="s2">&quot;Last modified: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">time</span><span class="o">.</span><span class="n">ctime</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">getmtime</span><span class="p">(</span><span class="n">Infile</span><span class="p">)))</span>
+ 449     <span class="n">MiscUtil</span><span class="o">.</span><span class="n">PrintInfo</span><span class="p">(</span><span class="s2">&quot;Created: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">time</span><span class="o">.</span><span class="n">ctime</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">getctime</span><span class="p">(</span><span class="n">Infile</span><span class="p">)))</span>
+ 450     
+ 451 <span class="k">def</span> <span class="nf">GetPocketSelectionResiduesInfoLabel</span><span class="p">(</span><span class="n">SelectionType</span><span class="p">):</span>
+ 452     <span class="sd">&quot;&quot;&quot;Get pocket residues info label for a specified selection type. &quot;&quot;&quot;</span>
+ 453 
+ 454     <span class="n">SelectionLabel</span> <span class="o">=</span> <span class="bp">None</span>
+ 455     
+ 456     <span class="k">if</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="s2">&quot;^Pockets$&quot;</span><span class="p">,</span> <span class="n">SelectionType</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">I</span><span class="p">):</span>
+ 457         <span class="n">SelectionLabel</span> <span class="o">=</span> <span class="s2">&quot;polymer&quot;</span>
+ 458     <span class="k">elif</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="s2">&quot;^PocketSolvents$&quot;</span><span class="p">,</span> <span class="n">SelectionType</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">I</span><span class="p">):</span>
+ 459         <span class="n">SelectionLabel</span> <span class="o">=</span> <span class="s2">&quot;solvent&quot;</span>
+ 460     <span class="k">elif</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="s2">&quot;^PocketInorganics$&quot;</span><span class="p">,</span> <span class="n">SelectionType</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">I</span><span class="p">):</span>
+ 461         <span class="n">SelectionLabel</span> <span class="o">=</span> <span class="s2">&quot;inorganic&quot;</span>
+ 462     <span class="k">else</span><span class="p">:</span>
+ 463         <span class="n">MiscUtil</span><span class="o">.</span><span class="n">PrintError</span><span class="p">(</span><span class="s2">&quot;Failed to retrieve pocket residues label information: Selection type </span><span class="si">%s</span><span class="s2"> is not valid...&quot;</span> <span class="o">%</span> <span class="n">SelectionType</span><span class="p">)</span>
+ 464 
+ 465     <span class="k">return</span> <span class="n">SelectionLabel</span>
+ 466 
+ 467 <span class="k">def</span> <span class="nf">ProcessOptions</span><span class="p">():</span>
+ 468     <span class="sd">&quot;&quot;&quot;Process and validate command line arguments and options&quot;&quot;&quot;</span>
+ 469 
+ 470     <span class="n">MiscUtil</span><span class="o">.</span><span class="n">PrintInfo</span><span class="p">(</span><span class="s2">&quot;Processing options...&quot;</span><span class="p">)</span>
+ 471     
+ 472     <span class="c1"># Validate options...</span>
+ 473     <span class="n">ValidateOptions</span><span class="p">()</span>
+ 474 
+ 475     <span class="n">OptionsInfo</span><span class="p">[</span><span class="s2">&quot;All&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">Options</span><span class="p">[</span><span class="s2">&quot;--all&quot;</span><span class="p">]</span>
+ 476     <span class="n">OptionsInfo</span><span class="p">[</span><span class="s2">&quot;BoundingBox&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">Options</span><span class="p">[</span><span class="s2">&quot;--boundingBox&quot;</span><span class="p">]</span>
+ 477     
+ 478     <span class="n">OptionsInfo</span><span class="p">[</span><span class="s2">&quot;Chains&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">Options</span><span class="p">[</span><span class="s2">&quot;--chains&quot;</span><span class="p">]</span>
+ 479     
+ 480     <span class="n">OptionsInfo</span><span class="p">[</span><span class="s2">&quot;CountResidues&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">Options</span><span class="p">[</span><span class="s2">&quot;--countResidues&quot;</span><span class="p">]</span>
+ 481     <span class="n">OptionsInfo</span><span class="p">[</span><span class="s2">&quot;Header&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">Options</span><span class="p">[</span><span class="s2">&quot;--header&quot;</span><span class="p">]</span>
+ 482     
+ 483     <span class="n">OptionsInfo</span><span class="p">[</span><span class="s2">&quot;Infiles&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">Options</span><span class="p">[</span><span class="s2">&quot;--infiles&quot;</span><span class="p">]</span>
+ 484     <span class="n">OptionsInfo</span><span class="p">[</span><span class="s2">&quot;InfilesNames&quot;</span><span class="p">]</span> <span class="o">=</span>  <span class="n">Options</span><span class="p">[</span><span class="s2">&quot;--infilesNames&quot;</span><span class="p">]</span>
+ 485     
+ 486     <span class="n">OptionsInfo</span><span class="p">[</span><span class="s2">&quot;Inorganics&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">Options</span><span class="p">[</span><span class="s2">&quot;--inorganics&quot;</span><span class="p">]</span>
+ 487     <span class="n">OptionsInfo</span><span class="p">[</span><span class="s2">&quot;Ligands&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">Options</span><span class="p">[</span><span class="s2">&quot;--ligands&quot;</span><span class="p">]</span>
+ 488     
+ 489     <span class="n">OptionsInfo</span><span class="p">[</span><span class="s2">&quot;PocketLigands&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">Options</span><span class="p">[</span><span class="s2">&quot;--pocketLigands&quot;</span><span class="p">]</span>
+ 490     <span class="n">OptionsInfo</span><span class="p">[</span><span class="s2">&quot;PocketDistanceCutoff&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">Options</span><span class="p">[</span><span class="s2">&quot;--pocketDistanceCutoff&quot;</span><span class="p">])</span>
+ 491     <span class="n">OptionsInfo</span><span class="p">[</span><span class="s2">&quot;PocketSolvents&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">Options</span><span class="p">[</span><span class="s2">&quot;--pocketSolvents&quot;</span><span class="p">]</span>
+ 492     <span class="n">OptionsInfo</span><span class="p">[</span><span class="s2">&quot;PocketInorganics&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">Options</span><span class="p">[</span><span class="s2">&quot;--pocketInorganics&quot;</span><span class="p">]</span>
+ 493     
+ 494     <span class="n">OptionsInfo</span><span class="p">[</span><span class="s2">&quot;Solvents&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">Options</span><span class="p">[</span><span class="s2">&quot;--solvents&quot;</span><span class="p">]</span>
+ 495 
+ 496     <span class="c1"># Update option values to list either default information or all information...</span>
+ 497     <span class="n">OptionNames</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;Chains&quot;</span><span class="p">,</span> <span class="s2">&quot;Header&quot;</span><span class="p">,</span> <span class="s2">&quot;Ligands&quot;</span><span class="p">]</span>
+ 498     <span class="k">if</span> <span class="n">OptionsInfo</span><span class="p">[</span><span class="s2">&quot;All&quot;</span><span class="p">]:</span>
+ 499         <span class="n">OptionNames</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;BoundingBox&quot;</span><span class="p">,</span> <span class="s2">&quot;Chains&quot;</span><span class="p">,</span>  <span class="s2">&quot;CountResidues&quot;</span><span class="p">,</span> <span class="s2">&quot;Header&quot;</span><span class="p">,</span> <span class="s2">&quot;Inorganics&quot;</span><span class="p">,</span> <span class="s2">&quot;Ligands&quot;</span><span class="p">,</span>  <span class="s2">&quot;PocketSolvents&quot;</span><span class="p">,</span> <span class="s2">&quot;PocketInorganics&quot;</span><span class="p">,</span> <span class="s2">&quot;Solvents&quot;</span><span class="p">]</span>
+ 500 
+ 501     <span class="k">for</span> <span class="n">Name</span> <span class="ow">in</span> <span class="n">OptionNames</span><span class="p">:</span>
+ 502         <span class="k">if</span> <span class="n">Name</span> <span class="ow">in</span> <span class="n">OptionsInfo</span><span class="p">:</span>
+ 503             <span class="n">OptionsInfo</span><span class="p">[</span><span class="n">Name</span><span class="p">]</span> <span class="o">=</span> <span class="bp">True</span>
+ 504         <span class="k">else</span><span class="p">:</span>
+ 505             <span class="n">MiscUtil</span><span class="o">.</span><span class="n">PrintError</span><span class="p">(</span><span class="s2">&quot;Option name </span><span class="si">%s</span><span class="s2"> is not a valid name...&quot;</span> <span class="o">%</span> <span class="n">s</span><span class="p">)</span>
+ 506     
+ 507 <span class="k">def</span> <span class="nf">RetrieveOptions</span><span class="p">():</span> 
+ 508     <span class="sd">&quot;&quot;&quot;Retrieve command line arguments and options&quot;&quot;&quot;</span>
+ 509     
+ 510     <span class="c1"># Get options...</span>
+ 511     <span class="k">global</span> <span class="n">Options</span>
+ 512     <span class="n">Options</span> <span class="o">=</span> <span class="n">docopt</span><span class="p">(</span><span class="n">_docoptUsage_</span><span class="p">)</span>
+ 513     
+ 514     <span class="c1"># Set current working directory to the specified directory...</span>
+ 515     <span class="n">WorkingDir</span> <span class="o">=</span> <span class="n">Options</span><span class="p">[</span><span class="s2">&quot;--workingdir&quot;</span><span class="p">]</span>
+ 516     <span class="k">if</span> <span class="n">WorkingDir</span><span class="p">:</span>
+ 517         <span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="n">WorkingDir</span><span class="p">)</span>
+ 518     
+ 519     <span class="c1"># Handle examples option...</span>
+ 520     <span class="k">if</span> <span class="s2">&quot;--examples&quot;</span> <span class="ow">in</span> <span class="n">Options</span> <span class="ow">and</span> <span class="n">Options</span><span class="p">[</span><span class="s2">&quot;--examples&quot;</span><span class="p">]:</span>
+ 521         <span class="n">MiscUtil</span><span class="o">.</span><span class="n">PrintInfo</span><span class="p">(</span><span class="n">MiscUtil</span><span class="o">.</span><span class="n">GetExamplesTextFromDocOptText</span><span class="p">(</span><span class="n">_docoptUsage_</span><span class="p">))</span>
+ 522         <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+ 523     
+ 524 <span class="k">def</span> <span class="nf">ValidateOptions</span><span class="p">():</span>
+ 525     <span class="sd">&quot;&quot;&quot;Validate option values&quot;&quot;&quot;</span>
+ 526 
+ 527     <span class="c1"># Expand infile names..</span>
+ 528     <span class="n">InfilesNames</span> <span class="o">=</span> <span class="n">MiscUtil</span><span class="o">.</span><span class="n">ExpandFileNames</span><span class="p">(</span><span class="n">Options</span><span class="p">[</span><span class="s2">&quot;--infiles&quot;</span><span class="p">],</span> <span class="s2">&quot;,&quot;</span><span class="p">)</span>
+ 529 
+ 530     <span class="c1"># Validate file extensions...</span>
+ 531     <span class="k">for</span> <span class="n">Infile</span> <span class="ow">in</span> <span class="n">InfilesNames</span><span class="p">:</span>
+ 532         <span class="n">MiscUtil</span><span class="o">.</span><span class="n">ValidateOptionFilePath</span><span class="p">(</span><span class="s2">&quot;-i, --infiles&quot;</span><span class="p">,</span> <span class="n">Infile</span><span class="p">)</span>
+ 533         <span class="n">MiscUtil</span><span class="o">.</span><span class="n">ValidateOptionFileExt</span><span class="p">(</span><span class="s2">&quot;-i, --infiles&quot;</span><span class="p">,</span> <span class="n">Infile</span><span class="p">,</span> <span class="s2">&quot;pdb cif&quot;</span><span class="p">)</span>
+ 534     <span class="n">Options</span><span class="p">[</span><span class="s2">&quot;--infilesNames&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">InfilesNames</span>
+ 535     
+ 536     <span class="n">MiscUtil</span><span class="o">.</span><span class="n">ValidateOptionFloatValue</span><span class="p">(</span><span class="s2">&quot;--pocketDistanceCutoff&quot;</span><span class="p">,</span> <span class="n">Options</span><span class="p">[</span><span class="s2">&quot;--pocketDistanceCutoff&quot;</span><span class="p">],</span> <span class="p">{</span><span class="s2">&quot;&gt;&quot;</span><span class="p">:</span> <span class="mf">0.0</span><span class="p">})</span>
+ 537 
+ 538 <span class="c1"># Setup a usage string for docopt...</span>
+ 539 <span class="n">_docoptUsage_</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
+ 540 <span class="s2">PyMOLInfoMacromolecules.py - List information about macromolecules</span>
+ 541 
+ 542 <span class="s2">Usage:</span>
+ 543 <span class="s2">    PyMOLInfoMacromolecules.py [--all] [--boundingBox] [--chains] [--countResidues] </span>
+ 544 <span class="s2">                               [--header] [--inorganics] [--ligands] [--pocketLigands]</span>
+ 545 <span class="s2">                               [--pocketDistanceCutoff  &lt;number&gt;] [--pocketSolvents] [--pocketInorganics]</span>
+ 546 <span class="s2">                               [--solvents] [-w &lt;dir&gt;] -i &lt;infile1,infile2,infile3...&gt;</span>
+ 547 <span class="s2">    PyMOLInfoMacromolecules.py -h | --help | -e | --examples</span>
+ 548 
+ 549 <span class="s2">Description:</span>
+ 550 <span class="s2">    List information regarding  ID, classification, experimental technique, chains,</span>
+ 551 <span class="s2">    solvents, inorganics, ligands, and ligand binding pockets in macromolecules</span>
+ 552 <span class="s2">    present including proteins and nucleic acids.</span>
+ 553 
+ 554 <span class="s2">    The supported input  file format are: PDB (.pdb), mmCIF (.cif)</span>
+ 555 
+ 556 <span class="s2">Options:</span>
+ 557 <span class="s2">    -a, --all</span>
+ 558 <span class="s2">        All available information.</span>
+ 559 <span class="s2">    -b, --boundingBox</span>
+ 560 <span class="s2">        Min and max coordinates for bounding box along with its size.</span>
+ 561 <span class="s2">    -c, --chains</span>
+ 562 <span class="s2">        Number of chains and their IDs. This is also default behavior.</span>
+ 563 <span class="s2">     --countResidues</span>
+ 564 <span class="s2">        Number of residues across chains. The chain residues s are identified</span>
+ 565 <span class="s2">        using polymer selection operator available in PyMOL.</span>
+ 566 <span class="s2">    -e, --examples</span>
+ 567 <span class="s2">        Print examples.</span>
+ 568 <span class="s2">    -h, --help</span>
+ 569 <span class="s2">        Print this help message.</span>
+ 570 <span class="s2">     --header</span>
+ 571 <span class="s2">        Header information including experimental technique information</span>
+ 572 <span class="s2">        along with any available resolution. This is also default behavior.</span>
+ 573 <span class="s2">    -i, --infiles &lt;infile1,infile2,infile3...&gt;</span>
+ 574 <span class="s2">        A comma delimited list of input files. The wildcards are also allowed</span>
+ 575 <span class="s2">        in file names.</span>
+ 576 <span class="s2">    --inorganics</span>
+ 577 <span class="s2">        Inorganic residues across chains. The inorganic residues are identified</span>
+ 578 <span class="s2">        using inorganic selection operator available in PyMOL.</span>
+ 579 <span class="s2">    -l, --ligands</span>
+ 580 <span class="s2">        Ligands across chains. This is also default behavior. The ligands</span>
+ 581 <span class="s2">        residues are identified using organic selection operator available</span>
+ 582 <span class="s2">        in PyMOL.</span>
+ 583 <span class="s2">    -p, --pocketLigands</span>
+ 584 <span class="s2">        Chain residues in ligand pockets.</span>
+ 585 <span class="s2">    --pocketDistanceCutoff &lt;number&gt;  [default: 5.0]</span>
+ 586 <span class="s2">        Distance in Angstroms for identifying pocket residues around ligands.</span>
+ 587 <span class="s2">    --pocketSolvents</span>
+ 588 <span class="s2">        Solvent residues in ligand pockets. The solvent residues are identified</span>
+ 589 <span class="s2">        using solvent selection operator available in PyMOL.</span>
+ 590 <span class="s2">    --pocketInorganics</span>
+ 591 <span class="s2">        Inorganic residues in ligand pockets. The inorganic residues are identified</span>
+ 592 <span class="s2">        using Inorganic selection operator available in PyMOL.</span>
+ 593 <span class="s2">    -s, --solvents</span>
+ 594 <span class="s2">        Solvent residues across chains. The solvent residues are identified</span>
+ 595 <span class="s2">        using solvent selection operator available in PyMOL.</span>
+ 596 <span class="s2">    -w, --workingdir &lt;dir&gt;</span>
+ 597 <span class="s2">        Location of working directory which defaults to the current directory.</span>
+ 598 
+ 599 <span class="s2">Examples:</span>
+ 600 <span class="s2">    To list header, chains, and ligand information for macromolecules in input</span>
+ 601 <span class="s2">    file, type:</span>
+ 602 
+ 603 <span class="s2">        % PyMOLInfoMacromolecules.py  -i Sample3.pdb</span>
+ 604 
+ 605 <span class="s2">    To list all available information for macromolecules in input files, type:</span>
+ 606 
+ 607 <span class="s2">        % PyMOLInfoMacromolecules.py  -a  -i &quot;Sample3.pdb,Sample4.pdb&quot;</span>
+ 608 
+ 609 <span class="s2">    To list pockets residues information along with other default information</span>
+ 610 <span class="s2">    for marcomolecules in input file, type:</span>
+ 611 
+ 612 <span class="s2">        % PyMOLInfoMacromolecules.py  -p --pocketDistanceCutoff 4.5 </span>
+ 613 <span class="s2">        --pocketSolvents  --pocketInorganics -i Sample3.pdb</span>
+ 614 
+ 615 <span class="s2">    To list chain residues information along with other default information</span>
+ 616 <span class="s2">    for marcomolecules in input file, type:</span>
+ 617 
+ 618 <span class="s2">        % PyMOLInfoMacromolecules.py  -c --countResidues --solvents</span>
+ 619 <span class="s2">        --inorganics -i &quot;Sample3.pdb,Sample4.pdb&quot; </span>
+ 620 
+ 621 <span class="s2">Author:</span>
+ 622 <span class="s2">    Manish Sud(msud@san.rr.com)</span>
+ 623 
+ 624 <span class="s2">See also:</span>
+ 625 <span class="s2">    DownloadPDBFiles.pl, PyMOLSplitChainsAndLigands.py,</span>
+ 626 <span class="s2">    PyMOLVisualizeMacromolecules.py</span>
+ 627 
+ 628 <span class="s2">Copyright:</span>
+ 629 <span class="s2">    Copyright (C) 2018 Manish Sud. All rights reserved.</span>
+ 630 
+ 631 <span class="s2">    The functionality available in this script is implemented using PyMOL, a</span>
+ 632 <span class="s2">    molecular visualization system on an open source foundation originally</span>
+ 633 <span class="s2">    developed by Warren DeLano.</span>
+ 634 
+ 635 <span class="s2">    This file is part of MayaChemTools.</span>
+ 636 
+ 637 <span class="s2">    MayaChemTools is free software; you can redistribute it and/or modify it under</span>
+ 638 <span class="s2">    the terms of the GNU Lesser General Public License as published by the Free</span>
+ 639 <span class="s2">    Software Foundation; either version 3 of the License, or (at your option) any</span>
+ 640 <span class="s2">    later version.</span>
+ 641 
+ 642 <span class="s2">&quot;&quot;&quot;</span>
+ 643 
+ 644 <span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+ 645     <span class="n">main</span><span class="p">()</span>
+</pre>
+<br />
+<center>
+<img src="../../../images/h2o2.png">
+</center>
+</body>
+</html>

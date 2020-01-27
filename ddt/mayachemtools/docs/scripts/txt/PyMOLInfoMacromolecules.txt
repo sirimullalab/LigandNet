@@ -1,0 +1,120 @@
+NAME
+    PyMOLInfoMacromolecules.py - List information about macromolecules
+
+SYNOPSIS
+    PyMOLInfoMacromolecules.py [--all] [--boundingBox] [--chains]
+    [--countResidues] [--header] [--inorganics] [--ligands]
+    [--pocketLigands] [--pocketDistanceCutoff <number>] [--pocketSolvents]
+    [--pocketInorganics] [--solvents] [-w <dir>] -i
+    <infile1,infile2,infile3...>
+
+    PyMOLInfoMacromolecules.py -h | --help | -e | --examples
+
+DESCRIPTION
+    List information regarding ID, classification, experimental technique,
+    chains, solvents, inorganics, ligands, and ligand binding pockets in
+    macromolecules present including proteins and nucleic acids.
+
+    The supported input file format are: PDB (.pdb), mmCIF (.cif)
+
+OPTIONS
+    -a, --all
+        All available information.
+
+    -b, --boundingBox
+        Min and max coordinates for bounding box along with its size.
+
+    -c, --chains
+        Number of chains and their IDs. This is also default behavior.
+        --countResidues Number of residues across chains. The chain residues
+        s are identified using polymer selection operator available in
+        PyMOL.
+
+    -e, --examples
+        Print examples.
+
+    -h, --help
+        Print this help message. --header Header information including
+        experimental technique information along with any available
+        resolution. This is also default behavior.
+
+    -i, --infiles <infile1,infile2,infile3...>
+        A comma delimited list of input files. The wildcards are also
+        allowed in file names.
+
+    --inorganics
+        Inorganic residues across chains. The inorganic residues are
+        identified using inorganic selection operator available in PyMOL.
+
+    -l, --ligands
+        Ligands across chains. This is also default behavior. The ligands
+        residues are identified using organic selection operator available
+        in PyMOL.
+
+    -p, --pocketLigands
+        Chain residues in ligand pockets.
+
+    --pocketDistanceCutoff <number> [default: 5.0]
+        Distance in Angstroms for identifying pocket residues around
+        ligands.
+
+    --pocketSolvents
+        Solvent residues in ligand pockets. The solvent residues are
+        identified using solvent selection operator available in PyMOL.
+
+    --pocketInorganics
+        Inorganic residues in ligand pockets. The inorganic residues are
+        identified using Inorganic selection operator available in PyMOL.
+
+    -s, --solvents
+        Solvent residues across chains. The solvent residues are identified
+        using solvent selection operator available in PyMOL.
+
+    -w, --workingdir <dir>
+        Location of working directory which defaults to the current
+        directory.
+
+EXAMPLES
+    To list header, chains, and ligand information for macromolecules in
+    input file, type:
+
+        % PyMOLInfoMacromolecules.py  -i Sample3.pdb
+
+    To list all available information for macromolecules in input files,
+    type:
+
+        % PyMOLInfoMacromolecules.py  -a  -i "Sample3.pdb,Sample4.pdb"
+
+    To list pockets residues information along with other default
+    information for marcomolecules in input file, type:
+
+        % PyMOLInfoMacromolecules.py  -p --pocketDistanceCutoff 4.5 
+        --pocketSolvents  --pocketInorganics -i Sample3.pdb
+
+    To list chain residues information along with other default information
+    for marcomolecules in input file, type:
+
+        % PyMOLInfoMacromolecules.py  -c --countResidues --solvents
+        --inorganics -i "Sample3.pdb,Sample4.pdb"
+
+AUTHOR
+    Manish Sud(msud@san.rr.com)
+
+SEE ALSO
+    DownloadPDBFiles.pl, PyMOLSplitChainsAndLigands.py,
+    PyMOLVisualizeMacromolecules.py
+
+COPYRIGHT
+    Copyright (C) 2018 Manish Sud. All rights reserved.
+
+    The functionality available in this script is implemented using PyMOL, a
+    molecular visualization system on an open source foundation originally
+    developed by Warren DeLano.
+
+    This file is part of MayaChemTools.
+
+    MayaChemTools is free software; you can redistribute it and/or modify it
+    under the terms of the GNU Lesser General Public License as published by
+    the Free Software Foundation; either version 3 of the License, or (at
+    your option) any later version.
+
