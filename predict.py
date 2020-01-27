@@ -49,6 +49,8 @@ def get_prediction(sdf_file, output=None):
         results[_name] = predict_info
 
     if output is not None:
+        if not os.path.isdir(output):
+            os.makedirs(output)
         # Write the output
         _, sdf_file = os.path.split(output)
         sdf_file, _ = os.path.splitext(sdf_file)
