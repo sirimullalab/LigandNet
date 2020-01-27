@@ -52,9 +52,9 @@ def get_prediction(sdf_file, output=None):
         if not os.path.isdir(output):
             os.makedirs(output)
         # Write the output
-        _, sdf_file = os.path.split(output)
+        _, sdf_file = os.path.split(sdf_file)
         sdf_file, _ = os.path.splitext(sdf_file)
-        output_file = os.path.join(output, sdf_file + ".csv")
+        output_file = os.path.join(output, sdf_file + ".json")
         with open(output_file, 'w') as f:
             json.dump(results, f)
         print(f"Results are saved to {output_file}")
