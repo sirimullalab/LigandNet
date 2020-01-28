@@ -10,7 +10,7 @@ Enzyme,xgb,cohen_kappa,1.0
 Enzyme,mlp,cohen_kappa,0.9313
 Kinase,svc,cohen_kappa,0.982
 Enzyme,mlp,cohen_kappa,0.9945
-TF,rf,cohen_kappa,0.8911
+TF,xgb,cohen_kappa,0.7442
 GPCR,xgb,cohen_kappa,0.9006
 Enzyme,svc,cohen_kappa,0.9009
 Enzyme,svc,cohen_kappa,0.9499
@@ -169,7 +169,7 @@ Kinase,svc,cohen_kappa,0.9259999999999999
 Transporter,xgb,cohen_kappa,1.0
 Enzyme,mlp,cohen_kappa,1.0
 Other,rf,cohen_kappa,1.0
-Enzyme,mlp,cohen_kappa,0.8316
+Enzyme,mlp,cohen_kappa,0.8779
 Enzyme,svc,cohen_kappa,1.0
 Other,svc,cohen_kappa,1.0
 Kinase,svc,cohen_kappa,0.9429
@@ -302,7 +302,7 @@ Other,rf,cohen_kappa,1.0
 IC,mlp,cohen_kappa,0.9476
 Enzyme,svc,cohen_kappa,0.9267
 NR,svc,cohen_kappa,1.0
-Enzyme,svc,cohen_kappa,0.8989
+Enzyme,mlp,cohen_kappa,1.0
 IC,rf,cohen_kappa,0.8939
 Kinase,svc,cohen_kappa,0.9512
 Enzyme,svc,cohen_kappa,0.9743
@@ -337,7 +337,7 @@ Enzyme,xgb,cohen_kappa,0.9677
 Enzyme,mlp,cohen_kappa,1.0
 Kinase,rf,cohen_kappa,1.0
 Enzyme,rf,cohen_kappa,1.0
-GPCR,mlp,cohen_kappa,1.0
+GPCR,rf,cohen_kappa,0.8688
 Enzyme,xgb,cohen_kappa,0.9358
 Other,svc,cohen_kappa,1.0
 GPCR,mlp,cohen_kappa,0.9742
@@ -460,7 +460,7 @@ Enzyme,rf,cohen_kappa,0.7848
 Kinase,xgb,cohen_kappa,0.9426
 Enzyme,rf,cohen_kappa,1.0
 NR,xgb,cohen_kappa,1.0
-Enzyme,xgb,cohen_kappa,0.8354
+Enzyme,xgb,cohen_kappa,0.6047
 NR,xgb,cohen_kappa,0.9924
 Enzyme,rf,cohen_kappa,0.927
 TF,rf,cohen_kappa,0.9002

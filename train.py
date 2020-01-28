@@ -182,7 +182,7 @@ class Train(object):
         joblib.dump(gridsearch_sv.best_estimator_, self.svc_model_file)
 
     def train_rf(self):
-        classifier_rf = RandomForestClassifier(class_weight='balanced', verbose=classifier_loglevel)
+        classifier_rf = RandomForestClassifier(class_weight='balanced',random_state=self.random_state, verbose=classifier_loglevel)
         parameters_rf = {'n_estimators':[i for i in range(100, 1000, 50)]}
         gridsearch_rf = GridSearchCV(classifier_rf, parameters_rf, pre_dispatch='n_jobs', scoring=self.scoring, cv=self.fold, refit='auc_score', n_jobs=-1, verbose=gridsearch_loglevel)
         gridsearch_rf.fit(self.x_train, self.y_train)
