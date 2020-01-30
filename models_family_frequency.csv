@@ -1,4 +1,4 @@
-,mlp,rf,svc,xgb
+protein_family,mlp,rf,svc,xgb
 Kinase,26,40,38,29
 Transporter,0,5,4,6
 Epigenetic,5,13,6,8
@@ -7,5 +7,5 @@ Other,5,31,19,18
 NR,2,7,6,5
 Enzyme,43,82,55,79
 GPCR,26,41,21,37
-TF; Epigenetic,1,0,1,0
+TF-Epigenetic,1,0,1,0
 TF,0,2,2,0
