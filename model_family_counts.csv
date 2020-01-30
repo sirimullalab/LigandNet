@@ -1,0 +1,36 @@
+mlp,Enzyme,44
+mlp,Kinase,26
+mlp,GPCR,25
+mlp,IC,6
+mlp,Epigenetic,5
+mlp,Other,5
+mlp,NR,2
+mlp,TF; Epigenetic,1
+rf,Enzyme,81
+rf,GPCR,42
+rf,Kinase,40
+rf,Other,31
+rf,IC,16
+rf,Epigenetic,14
+rf,NR,8
+rf,Transporter,5
+rf,TF,1
+svc,Enzyme,55
+svc,Kinase,38
+svc,GPCR,21
+svc,Other,19
+svc,Epigenetic,5
+svc,NR,5
+svc,IC,4
+svc,Transporter,4
+svc,TF,2
+svc,TF; Epigenetic,1
+xgb,Enzyme,79
+xgb,GPCR,37
+xgb,Kinase,29
+xgb,Other,18
+xgb,IC,14
+xgb,Epigenetic,8
+xgb,Transporter,6
+xgb,NR,5
+xgb,TF,1
