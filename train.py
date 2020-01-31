@@ -69,6 +69,7 @@ class Train(object):
         self.svc_model_file = os.path.join(self.model_dir, f"{self.uniprot_id}.svc")
         self.result_file = os.path.join(self.output_dir, f"{self.uniprot_id}_results.json")
         self.results = dict()
+        self.refit = 'f1_score'
         self.scoring = {'auc_score': 'roc_auc',
                         'precision_score': make_scorer(metrics.precision_score),
                         'recall_score': make_scorer(metrics.recall_score),
@@ -165,7 +166,7 @@ class Train(object):
         classifier_nn = MLPClassifier(solver='adam', alpha=1e-5, early_stopping=True, random_state=self.random_state, verbose=classifier_loglevel)
         hidden_layer_sizes = get_hidden_layers()
         parameters_nn = {'hidden_layer_sizes': hidden_layer_sizes}
-        gridsearch_nn = GridSearchCV(classifier_nn, parameters_nn, pre_dispatch='n_jobs', scoring=self.scoring, cv=self.fold, refit='auc_score', n_jobs=-1, verbose=gridsearch_loglevel)
+        gridsearch_nn = GridSearchCV(classifier_nn, parameters_nn, pre_dispatch='n_jobs', scoring=self.scoring, cv=self.fold, refit=self.refit, n_jobs=-1, verbose=gridsearch_loglevel)
         gridsearch_nn.fit(self.x_train, self.y_train)
         self.nn_model = gridsearch_nn.best_estimator_
         self.results['mlp'] = self.get_report(gridsearch_nn.best_estimator_)
@@ -175,7 +176,7 @@ class Train(object):
         # Support Vector Machine
         classifier_sv = SVC(class_weight='balanced', kernel='linear', probability=True, random_state=self.random_state, verbose=classifier_loglevel)
         parameters_sv = {'C': [0.1, 1.0, 10, 100, 1000], 'gamma':[0.1, 1, 10, 100, 1000, 'auto']}
-        gridsearch_sv = GridSearchCV(classifier_sv, parameters_sv, pre_dispatch='n_jobs', scoring=self.scoring, cv=self.fold, refit='auc_score', n_jobs=-1, verbose=gridsearch_loglevel)
+        gridsearch_sv = GridSearchCV(classifier_sv, parameters_sv, pre_dispatch='n_jobs', scoring=self.scoring, cv=self.fold, refit=self.refit, n_jobs=-1, verbose=gridsearch_loglevel)
         gridsearch_sv.fit(self.x_train, self.y_train)
         self.svc_model = gridsearch_sv.best_estimator_
         self.results['svc'] = self.get_report(gridsearch_sv.best_estimator_)
@@ -184,7 +185,7 @@ class Train(object):
     def train_rf(self):
         classifier_rf = RandomForestClassifier(class_weight='balanced',random_state=self.random_state, verbose=classifier_loglevel)
         parameters_rf = {'n_estimators':[i for i in range(100, 1000, 50)]}
-        gridsearch_rf = GridSearchCV(classifier_rf, parameters_rf, pre_dispatch='n_jobs', scoring=self.scoring, cv=self.fold, refit='auc_score', n_jobs=-1, verbose=gridsearch_loglevel)
+        gridsearch_rf = GridSearchCV(classifier_rf, parameters_rf, pre_dispatch='n_jobs', scoring=self.scoring, cv=self.fold, refit=self.refit, n_jobs=-1, verbose=gridsearch_loglevel)
         gridsearch_rf.fit(self.x_train, self.y_train)
         self.rf_model = gridsearch_rf.best_estimator_
         self.results['rf'] = self.get_report(gridsearch_rf.best_estimator_)
