@@ -1,0 +1,57 @@
+#!/bin/bash
+#
+# Simple SLURM script for submitting multiple serial
+# jobs (e.g. parametric studies) using a script wrapper
+# to launch the jobs.
+#
+# To use, build the launcher executable and your
+# serial application(s) and place them in your WORKDIR
+# directory.  Then, edit the CONTROL_FILE to specify
+# each executable per process.
+#-------------------------------------------------------
+#-------------------------------------------------------
+#
+#         <------ Setup Parameters ------>
+#
+# N: Number of nodes
+# n: Number of MPI task requested. 
+# NHOSTS: Usually the same as N
+# PPN: Process per node.
+# 
+# For chantis: N: 1, n: 56 <56 for small tasks>, NHOSTS:1, PPN: <?>
+# Stampede: N: <# of Nodes>, n: <68 per node>, NHOSTS: <# of Nodes> , PPN: <?> 
+
+#SBATCH -J ligandnet
+#SBATCH -N 100 -n 6800
+#SBATCH -p normal
+#SBATCH -o ligandnet.o%j
+#SBATCH -e ligandnet.err%j
+#SBATCH -t 4:00:00
+#SBATCH --mail-user=mhassan@miners.utep.edu
+#SBATCH --mail-type=begin   # email me when the job starts
+#SBATCH --mail-type=end     # email me when the job finishes
+#          <------ Account String ----->
+# <--- (Use this ONLY if you have MULTIPLE accounts) --->
+#SBATCH -A VinaXB
+#------------------------------------------------------
+#source activate ml 
+module purge
+module load TACC
+module load launcher
+module load intel/18.0.0
+module load hdf5
+module load python3
+source .venv/bin/activate
+
+export LAUNCHER_DIR=/work/04268/tg835677/stampede2/launcher/
+export LAUNCHER_PLUGIN_DIR=$LAUNCHER_DIR/plugins
+export LAUNCHER_RMI=SLURM
+export LAUNCHER_JOB_FILE=run.sh
+export LAUNCHER_WORKDIR=$PWD
+export LAUNCHER_NHOSTS=16
+export LAUNCHER_PPN=1
+export LAUNCHER_SCHED=block #dynamic #interleaved
+export LAUNCHER_BIND=1
+
+$LAUNCHER_DIR/paramrun
+
