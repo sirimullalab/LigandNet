@@ -34,11 +34,11 @@ classifier_loglevel = 0
 gridsearch_loglevel = 2
 
 # List the directories and files
-active_dir = "pharos_database/actives_fingerprints"
-decoy_dir = "pharos_database/decoys_fingerprints"
+active_dir = "../pharos_database/actives_fingerprints"
+decoy_dir = "../pharos_database/decoys_fingerprints"
 
 # Load uniprot ids
-protein_to_uniprot = json.load(open('protein_to_uniprot.json', 'r'))
+protein_to_uniprot = json.load(open('../protein_to_uniprot.json', 'r'))
         
 # active_files = glob(os.path.join(active_dir, '*.csv'))
 # decoy_files = glob(os.path.join(decoy_dir, '*.csv'))
@@ -54,8 +54,8 @@ class Train(object):
         self.sample_threshold = sample_threshold
         
         # Initialize directories
-        self.model_dir = 'models'
-        self.output_dir = 'reports'
+        self.model_dir = '../models/files'
+        self.output_dir = '../models/reports'
         for _dir in [self.model_dir, self.output_dir]:
             if not os.path.isdir(_dir): os.makedirs(_dir)
         
@@ -69,12 +69,13 @@ class Train(object):
         self.svc_model_file = os.path.join(self.model_dir, f"{self.uniprot_id}.svc")
         self.result_file = os.path.join(self.output_dir, f"{self.uniprot_id}_results.json")
         self.results = dict()
-        self.refit = 'f1_score'
         self.scoring = {'auc_score': 'roc_auc',
                         'precision_score': make_scorer(metrics.precision_score),
                         'recall_score': make_scorer(metrics.recall_score),
-                        'accuracy_score': make_scorer(metrics.accuracy_score)
+                        'accuracy_score': make_scorer(metrics.accuracy_score),
+                        'f1_score': make_scorer(metrics.f1_score)
                         }
+        self.refit = 'f1_score'
         self.fold = 5
         
     def get_data(self):
@@ -226,7 +227,7 @@ if __name__=="__main__":
     _, protein = os.path.split(actives_file)
     protein, _ = os.path.splitext(protein)
     uniprot_id = protein_to_uniprot.get(protein, protein)
-    if os.path.isfile(f'reports/{uniprot_id}_results.json'):
+    if os.path.isfile(f'../models/reports/{uniprot_id}_results.json'):
         print("ERROR: REPORTS FILE FOUND. MODELS ARE ALREADY TRAINED.")
         sys.exit()
     else:
