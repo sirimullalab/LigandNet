@@ -65,7 +65,7 @@ class Train(object):
         self.uniprot_id = protein_to_uniprot.get(self.protein_name, self.protein_name)
         self.xgb_model_file = os.path.join(self.model_dir, f"{self.uniprot_id}.xgb")
         self.rf_model_file = os.path.join(self.model_dir, f"{self.uniprot_id}.rf")
-        self.nn_model_file = os.path.join(self.model_dir, f"{self.uniprot_id}.mlp")
+        self.nn_model_file = os.path.join(self.model_dir, f"{self.uniprot_id}.ann")
         self.svc_model_file = os.path.join(self.model_dir, f"{self.uniprot_id}.svc")
         self.result_file = os.path.join(self.output_dir, f"{self.uniprot_id}_results.json")
         self.results = dict()
@@ -170,7 +170,7 @@ class Train(object):
         gridsearch_nn = GridSearchCV(classifier_nn, parameters_nn, pre_dispatch='n_jobs', scoring=self.scoring, cv=self.fold, refit=self.refit, n_jobs=-1, verbose=gridsearch_loglevel)
         gridsearch_nn.fit(self.x_train, self.y_train)
         self.nn_model = gridsearch_nn.best_estimator_
-        self.results['mlp'] = self.get_report(gridsearch_nn.best_estimator_)
+        self.results['ann'] = self.get_report(gridsearch_nn.best_estimator_)
         joblib.dump(gridsearch_nn.best_estimator_, self.nn_model_file)
         
     def train_svc(self):

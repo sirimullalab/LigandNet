@@ -1,11 +1,11 @@
-mlp,Enzyme,44
-mlp,Kinase,26
-mlp,GPCR,25
-mlp,IC,6
-mlp,Epigenetic,5
-mlp,Other,5
-mlp,NR,2
-mlp,TF; Epigenetic,1
+ann,Enzyme,44
+ann,Kinase,26
+ann,GPCR,25
+ann,IC,6
+ann,Epigenetic,5
+ann,Other,5
+ann,NR,2
+ann,TF; Epigenetic,1
 rf,Enzyme,81
 rf,GPCR,42
 rf,Kinase,40
