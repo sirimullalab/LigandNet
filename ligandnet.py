@@ -49,7 +49,8 @@ class LigandNet(object):
         cmpd_id, features = self.get_features(input, input_type)
         cmpd_id = np.array(cmpd_id)
         for uniprot_id, model in tqdm(zip(self.uniprot_ids, self.models), total=703):
-            pred = model.predict_proba(features)[:, 1]
+            # np.float32 is not json serializable, take float64
+            pred = model.predict_proba(features).astype(np.float64)[:, 1].round(2)
             mask = pred >= confidence_threshold
             for _id, _pred in zip(cmpd_id[mask], pred[mask]):
                 # Create a dictionary for compound if not exists
