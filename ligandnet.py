@@ -1,7 +1,7 @@
-## Script for predicting ligand activity using LigandNet models
-## Author: Md Mahmudulla Hassan
-## Department of Computer Science and School of Pharmacy, UTEP
-## Last modified: 02/20/2020
+# Script for predicting ligand activity using LigandNet models
+# Author: Md Mahmudulla Hassan
+# Department of Computer Science and School of Pharmacy, UTEP
+# Last modified: 02/20/2020
 
 import os
 import joblib
@@ -16,21 +16,23 @@ from collections import OrderedDict
 from tqdm import tqdm
 import argparse
 
+
 class LigandNet(object):
     MODELS_DIR = os.path.join('models/files')
-    
+
     def __init__(self):
         self.load_models()
-        
+
     def load_models(self):
-        #TODO: Avoid loading all the models
+        # TODO: Avoid loading all the models
         # Read the best models
         with open('best_models.txt', 'r') as f:
-            best_models = f.read().splitlines()[:10]
-        
+            best_models = f.read().splitlines()
+
         self.uniprot_ids = [model_path[:6] for model_path in best_models]
-        self.models = [joblib.load(os.path.join(self.MODELS_DIR, model_path)) for model_path in best_models]
-            
+        self.models = [joblib.load(os.path.join(
+            self.MODELS_DIR, model_path)) for model_path in best_models]
+
     def get_features(self, input, input_type):
         # TODO: Add functionality for reading from a smi file containing a bulk of smiles
         ft = FeatureGenerator()
@@ -40,7 +42,7 @@ class LigandNet(object):
             ft.load_sdf(input)
         cmpd_id, features = ft.extract_tpatf()
         return cmpd_id, features.reshape(-1, 2692)
-    
+
     # Get predictions
     def get_prediction(self, input, input_type, confidence_threshold=0.5):
         results = {}
@@ -54,7 +56,7 @@ class LigandNet(object):
                 if _id not in results.keys():
                     results[_id] = {}
                 # Update the compound result dictionary
-                results[_id].update({uniprot_id:_pred})
+                results[_id].update({uniprot_id: _pred})
         return results
 
 
@@ -70,15 +72,15 @@ if __name__ == "__main__":
 #                         required=False, help='Output directory')
     parser.add_argument('--confidence', action='store', dest='confidence', type=float,
                         default=0.50, help='Minimum confidence to consider for prediction. Default is 0.5')
-    
+
     args = parser.parse_args()
-    
+
     if not (args.smiles or args.sdf):
         parser.error('No input found. Provide --smiles or --sdf')
-    
+
     print(f"Loading the LigandNet models ...")
     l = LigandNet()
-    
+
     if args.sdf is not None:
         if not os.path.isfile(args.sdf):
             raise FileNotFoundError(errno.ENOENT, os.strerror(
@@ -88,6 +90,5 @@ if __name__ == "__main__":
         print(results)
 
     if args.smiles is not None:
-        results = l.get_prediction(args.smiles,'smiles', args.confidence)
+        results = l.get_prediction(args.smiles, 'smiles', args.confidence)
         print(results)
-
