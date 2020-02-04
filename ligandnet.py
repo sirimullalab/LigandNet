@@ -79,7 +79,7 @@ if __name__ == "__main__":
     if not (args.smiles or args.sdf):
         parser.error('No input found. Provide --smiles or --sdf')
 
-    print(f"Loading the LigandNet models ...")
+    print("Loading the LigandNet models ...")
     l = LigandNet()
 
     if args.sdf is not None:

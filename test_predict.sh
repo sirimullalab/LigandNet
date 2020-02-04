@@ -1,1 +1,0 @@
-python predict.py --sdf samples/AAAAML.xaa.sdf --out temp

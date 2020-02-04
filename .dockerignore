@@ -1,0 +1,5 @@
+.git
+.cache
+models/bad_models
+models/reports
+pharos_database
