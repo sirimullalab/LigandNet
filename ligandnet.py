@@ -18,7 +18,7 @@ import argparse
 
 
 class LigandNet(object):
-    MODELS_DIR = os.path.join('models/files')
+    MODELS_DIR = os.path.join("models/files")
 
     def __init__(self):
         self.load_models()
@@ -26,17 +26,19 @@ class LigandNet(object):
     def load_models(self):
         # TODO: Avoid loading all the models
         # Read the best models
-        with open('best_models.txt', 'r') as f:
+        with open("best_models.txt", "r") as f:
             best_models = f.read().splitlines()
 
         self.uniprot_ids = [model_path[:6] for model_path in best_models]
-        self.models = [joblib.load(os.path.join(
-            self.MODELS_DIR, model_path)) for model_path in best_models]
+        self.models = [
+            joblib.load(os.path.join(self.MODELS_DIR, model_path))
+            for model_path in best_models
+        ]
 
     def get_features(self, input, input_type):
         # TODO: Add functionality for reading from a smi file containing a bulk of smiles
         ft = FeatureGenerator()
-        if input_type == 'smiles':
+        if input_type == "smiles":
             ft.load_smiles(input)
         else:
             ft.load_sdf(input)
@@ -64,32 +66,38 @@ class LigandNet(object):
 if __name__ == "__main__":
     start = time.time()
     parser = argparse.ArgumentParser(
-        description="Ligand activity prediction using LigandNet")
-    parser.add_argument('--sdf', action='store',
-                        dest='sdf', help='SDF file location')
-    parser.add_argument('--smiles', action='store', type=str,
-                        dest='smiles', help='SMILES')
-#     parser.add_argument('--out', action='store', dest='out',
-#                         required=False, help='Output directory')
-    parser.add_argument('--confidence', action='store', dest='confidence', type=float,
-                        default=0.50, help='Minimum confidence to consider for prediction. Default is 0.5')
+        description="Ligand activity prediction using LigandNet"
+    )
+    parser.add_argument("--sdf", action="store", dest="sdf", help="SDF file location")
+    parser.add_argument(
+        "--smiles", action="store", type=str, dest="smiles", help="SMILES"
+    )
+    #     parser.add_argument('--out', action='store', dest='out',
+    #                         required=False, help='Output directory')
+    parser.add_argument(
+        "--confidence",
+        action="store",
+        dest="confidence",
+        type=float,
+        default=0.50,
+        help="Minimum confidence to consider for prediction. Default is 0.5",
+    )
 
     args = parser.parse_args()
 
     if not (args.smiles or args.sdf):
-        parser.error('No input found. Provide --smiles or --sdf')
+        parser.error("No input found. Provide --smiles or --sdf")
 
     print("Loading the LigandNet models ...")
     l = LigandNet()
 
     if args.sdf is not None:
         if not os.path.isfile(args.sdf):
-            raise FileNotFoundError(errno.ENOENT, os.strerror(
-                errno.ENOENT), args.sdf)
+            raise FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT), args.sdf)
 
-        results = l.get_prediction(args.sdf, 'sdf', args.confidence)
+        results = l.get_prediction(args.sdf, "sdf", args.confidence)
         print(results)
 
     if args.smiles is not None:
-        results = l.get_prediction(args.smiles, 'smiles', args.confidence)
+        results = l.get_prediction(args.smiles, "smiles", args.confidence)
         print(results)
