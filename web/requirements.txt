@@ -1,1 +1,9 @@
-flask
+joblib==0.14.1
+numpy==1.18.1
+pandas==0.25.3
+scikit-learn==0.22.0
+scipy==1.4.1
+six==1.13.0
+xgboost==0.90
+tqdm==2.2.3
+flask==1.1.2

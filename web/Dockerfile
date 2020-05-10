@@ -1,9 +1,17 @@
-FROM hassanmohsin/ligandnet:latest
+FROM hassanmohsin/rdkit-openbabel:latest
 
-COPY requirements.txt ./
-RUN pip3 install -r requirements.txt
+RUN apt update && apt upgrade -y
+RUN apt install -y python3-pip
 
-COPY app.py ./app.py
+COPY requirements.txt .
+# RUN pip3 install -r requirements.txt
 
-ENTRYPOINT [ "python3", "app.py" ]
-EXPOSE 5000
+WORKDIR /app
+COPY ../ligandnet .
+
+ENTRYPOINT ["python3", "-m", "ligandnet.predict"]
+
+# Web
+# COPY app.py .
+# ENTRYPOINT [ "python3", "app.py" ]
+# EXPOSE 5000

@@ -8,7 +8,7 @@ conda env create -f environment.yml
 ```
 
 # Run
-Use `ligandnet.py` to run predictions. To see the available options, run `python ligandnet.py --help` which shows the following:
+Use `python -m ligandnet.predict` to get the predictions. Possible arguments are
 
 ```bash
 usage: ligandnet.py [-h] [--sdf SDF] [--smiles SMILES]
