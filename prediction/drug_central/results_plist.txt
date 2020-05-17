@@ -1,0 +1,485 @@
+P55789
+	anazolene: 1.0
+	sulfamazone: 1.0
+	tartrazine: 1.0
+	suramin: 1.0
+	axitinib: 0.53
+	carvedilol: 0.91
+	flavodic acid: 1.0
+	mepacrine: 0.61
+	sulisatin: 1.0
+	hidrosmin: 0.54
+	piperaquine: 0.51
+	pyronaridine: 0.98
+	brexpiprazole: 0.68
+	adinazolam: 0.57
+	belotecan: 0.57
+	losartan: 0.53
+	traxanox: 0.64
+	tedizolid phosphate: 0.89
+	lenvatinib: 0.73
+	tivozanib: 0.74
+	asulacrine: 1.0
+	eprosartan: 0.89
+	quercetin: 0.51
+	solasulfone: 0.99
+	dixyrazine: 0.52
+	anisindione: 0.79
+	fluindione: 0.7
+	phenindione: 0.57
+	bromindione: 0.52
+	clorindione: 0.52
+	fenbendazole: 0.97
+	ipragliflozin: 0.97
+	bendazac: 0.74
+	sulfobromophthalein: 1.0
+	deferasirox: 1.0
+	glucametacin: 0.92
+	dapagliflozin: 0.84
+	polydatin: 0.76
+	tofogliflozin: 0.53
+	benoxaprofen: 1.0
+	cinalukast: 0.84
+	dexketoprofen: 0.96
+	fentiazac: 1.0
+	flunoxaprofen: 1.0
+	intoplicine: 0.83
+	isofezolac: 1.0
+	ketoprofen: 0.96
+	liothyronine: 0.94
+	pranoprofen: 0.87
+	sulfaloxic acid: 1.0
+	sulfasalazine: 1.0
+	valsartan: 0.91
+	zaltoprofen: 0.96
+	bermoprofen: 0.96
+	fendosal: 1.0
+	isoxepac: 0.98
+	salazosulfadimidine: 1.0
+	laropiprant: 0.91
+	eltrombopag: 0.97
+	ataluren: 1.0
+	amlexanox: 0.69
+	amsacrine: 1.0
+	papaveroline: 1.0
+	raloxifene: 0.91
+	pirenoxine: 0.95
+	bazedoxifene: 0.97
+	diosmetin: 1.0
+	elliptinium: 0.72
+	sorafenib: 0.65
+	oxycinchophen: 0.99
+	regorafenib: 0.75
+	ozenoxacin: 0.99
+	rucaparib: 0.96
+	pexidartinib: 0.65
+	clometacin: 0.53
+	menadiol sulfate: 0.69
+	ozagrel: 0.77
+	aldesulfone: 0.99
+	tienilic acid: 0.94
+	fosfestrol: 1.0
+	choline fenofibrate: 0.94
+	cridanimod: 0.99
+	menadiol sodium diphosphate: 0.99
+	adrafinil: 0.59
+	amoxapine: 0.72
+	antazoline: 0.8
+	benzylthiouracil: 0.78
+	brimonidine: 0.79
+	carazolol: 0.64
+	diflunisal: 0.91
+	doxefazepam: 0.51
+	fenoldopam: 0.8
+	floctafenine: 0.92
+	hycanthone: 0.62
+	lorazepam: 0.6
+	mefloquine: 0.63
+	oxazepam: 0.86
+	phentolamine: 0.86
+	temazepam: 0.63
+	tofenacin: 0.56
+	vonoprazan: 0.69
+	mefuparib: 0.89
+	acitazanolast: 0.72
+	rosoxacin: 0.98
+	alatrofloxacin: 0.81
+	balsalazide: 1.0
+	benzamidosalicylate: 0.98
+	bromfenac: 0.94
+	bumadizone: 0.86
+	bumetanide: 0.72
+	carprofen: 0.98
+	clonixin: 0.96
+	diclofenac: 0.8
+	edatrexate: 0.63
+	fenclofenac: 0.82
+	fenoprofen: 0.99
+	flufenamic acid: 0.99
+	flurbiprofen: 0.89
+	folic acid: 0.55
+	gemfibrozil: 0.74
+	indobufen: 0.98
+	indoprofen: 0.97
+	ketorolac: 0.95
+	lobenzarit: 0.95
+	lonazolac: 1.0
+	lumiracoxib: 0.86
+	meclofenamic acid: 0.95
+	mefenamic acid: 0.98
+	metiazinic acid: 0.98
+	mofezolac: 0.62
+	nadifloxacin: 0.82
+	nalidixic acid: 0.51
+	niflumic acid: 0.99
+	olsalazine: 0.99
+	pemetrexed: 1.0
+	phthalylsulfacetamide: 0.99
+	phthalylsulfathiazole: 0.99
+	protizinic acid: 0.97
+	raltitrexed: 0.99
+	salsalate: 0.92
+	succinylsulfathiazole: 0.79
+	suprofen: 0.95
+	temafloxacin: 0.92
+	tiaprofenic acid: 0.95
+	tolfenamic acid: 0.97
+	tolmetin: 0.92
+	tranilast: 0.77
+	zomepirac: 0.86
+	cinchophen: 1.0
+	enfenamic acid: 0.96
+	loretin: 0.97
+	pheniodol sodium: 0.74
+	succisulfone: 0.98
+	thyropropic acid: 0.84
+	tiratricol: 0.95
+	actinoquinol: 0.9
+	clopirac: 0.58
+	garenoxacin: 0.98
+	pralatrexate: 0.56
+	tafamidis: 0.96
+	esflurbiprofen: 0.89
+	fosaprepitant: 1.0
+	nintedanib: 0.86
+	capobenic acid: 0.58
+	methoxsalen: 0.94
+	aceclofenac: 0.62
+	afloqualone: 0.51
+	aminophenazone: 0.53
+	amodiaquine: 0.75
+	azimilide: 0.6
+	chlorfenethazine: 0.53
+	chromocarb: 0.74
+	dantrolene: 0.82
+	phenazone: 0.7
+	dimethoxanate: 0.59
+	diphenylpyraline: 0.63
+	estazolam: 0.76
+	febuxostat: 0.69
+	flosequinan: 0.59
+	glafenine: 0.9
+	hymecromone: 0.83
+	letrozole: 0.82
+	lonidamine: 0.96
+	pecazine: 0.66
+	mequitazine: 0.85
+	methylthioninium chloride: 0.71
+	mianserin: 0.62
+	milrinone: 0.69
+	minaprine: 0.89
+	mirtazapine: 0.79
+	pimobendan: 0.72
+	pitofenone: 0.54
+	promethazine: 0.7
+	quetiapine: 0.52
+	trioxsalen: 0.66
+	carbaryl: 0.8
+	dimethylthiambutene: 0.57
+	ethylmethylthiambutene: 0.7
+	etofenamate: 0.8
+	methylchromone: 0.76
+	zolimidine: 0.61
+	antrafenine: 0.6
+	carsalam: 0.88
+	fenethazine: 0.63
+	asenapine: 0.5
+	pirfenidone: 0.59
+	picodralazine: 0.83
+	dimethylaminopropionylphenothiazine: 0.58
+	empagliflozin: 0.86
+	crisaborole: 0.67
+	ertugliflozin: 0.94
+	sotagliflozin: 0.97
+	tenapanor: 0.97
+	zanubrutinib: 0.74
+	roxadustat: 1.0
+	bisoxatin: 0.97
+	indigo carmine: 0.97
+	opicapone: 0.58
+	levdobutamine: 0.63
+	bendazol: 0.58
+	dobutamine: 0.63
+	ritodrine: 0.7
+	enoximone: 0.82
+	fluoxetine: 0.65
+	osalmid: 0.86
+	tiocarlide: 0.51
+	etomidoline: 0.57
+	formylsulfamethin: 0.54
+	phenacaine: 0.59
+	almitrine: 0.92
+	clobenoside: 0.72
+	masoprocol: 0.99
+	flubendazole: 0.95
+	mebendazole: 0.95
+	dantron: 0.7
+	dithranol: 0.82
+	apomorphine: 0.98
+	oxagrelate: 0.96
+	proflavine: 0.99
+	tolonium: 0.72
+	drometrizole: 0.71
+	ensulizole: 0.99
+	biphenylol: 0.82
+	nefopam: 0.52
+	tripelennamine: 0.52
+	mexenone: 0.57
+	oxybenzone: 0.69
+	clobenzepam: 0.51
+	terizidone: 0.92
+	sulisobenzone: 0.96
+	imiquimod: 0.58
+	amocarzine: 0.58
+	torsemide: 0.83
+	adrenalone: 0.51
+	anethole trithione: 0.64
+	benzatropine: 0.58
+	broxyquinoline: 0.92
+	chloroxine: 0.92
+	clioquinol: 0.92
+	dimetofrine: 0.59
+	etamivan: 0.71
+	ftivazide: 0.93
+	diiodohydroxyquinoline: 0.92
+	metapramine: 0.79
+	monobenzone: 0.58
+	mepyramine: 0.5
+	tilbroquinol: 0.95
+	tiliquinol: 0.95
+	bergapten: 0.9
+	chlorquinaldol: 0.91
+	cloxiquine: 0.91
+	oxyquinoline: 0.93
+	khellin: 0.72
+	phanquinone: 0.73
+	acedapsone: 0.82
+	protocatechualdehyde: 0.59
+	osilodrostat: 0.51
+	sultosilic acid: 0.96
+	sivelestat: 0.98
+	tretoquinol: 0.53
+	iguratimod: 0.89
+	binimetinib: 0.76
+	selumetinib: 0.82
+	benzylhydrochlorothiazide: 0.51
+	glisoxepide: 0.9
+	sulfaguanole: 0.98
+	fenbenicillin: 0.85
+	difetarsone: 0.99
+	pyrithione: 0.72
+	benzthiazide: 0.81
+	piberaline: 0.5
+	acediasulfone: 0.96
+	acetaminosalol: 0.68
+	amezinium metilsulfate: 0.79
+	dextrothyroxine: 0.96
+	epinastine: 0.59
+	hesperetin: 0.73
+	nitrefazole: 0.59
+	oxazolam: 0.51
+	phenytoin: 0.84
+	rofecoxib: 0.62
+	levothyroxine: 0.96
+	tolcapone: 0.73
+	topotecan: 0.85
+	sulmazole: 0.85
+	fenadiazole: 0.88
+	diseptal B: 0.52
+	phethenylate: 0.86
+	morniflumate: 0.71
+	topiroxostat: 0.83
+	cobimetinib: 0.68
+	terguride: 0.72
+	ticlatone: 0.61
+	etifoxine: 0.56
+	sumatriptan: 0.59
+	olanzapine: 0.67
+	mandelic acid: 0.7
+	todralazine: 0.78
+	bufexamac: 0.64
+	rizatriptan: 0.81
+	nomifensine: 0.72
+	yohimbine: 0.94
+	chlorazanil: 0.62
+	methaphenilene: 0.63
+	albendazole sulfoxide: 0.83
+	chlorzoxazone: 0.71
+	nitroxoline: 0.95
+	thiabendazole: 0.9
+	ciclobendazole: 0.76
+	paraoxon: 0.53
+	nefazodone: 0.5
+	isoxsuprine: 0.61
+	amrinone: 0.55
+	bropirimine: 0.96
+	enprofylline: 0.61
+	bezafibrate: 0.54
+	leteprinim: 0.92
+	dapsone: 0.6
+	enilconazole: 0.5
+	roxatidine acetate: 0.57
+	zoxazolamine: 0.69
+	alclofenac: 0.54
+	bucetin: 0.74
+	amanozine: 0.65
+	isocarboxazid: 0.73
+	amiphenazole: 0.63
+	thiazosulfone: 0.67
+	albendazole: 0.82
+	amphenidone: 0.86
+	teriflunomide: 0.88
+Q13546
+	tartrazine: 0.61
+	suramin: 0.55
+	evans blue: 0.54
+	trypan blue: 0.55
+O60885
+	dabrafenib: 0.69
+	trametinib: 1.0
+	udenafil: 1.0
+	pyronaridine: 0.91
+	azosemide: 0.93
+	colchicine: 1.0
+	lapatinib: 0.66
+	losartan: 1.0
+	traxanox: 0.99
+	vorozole: 0.95
+	tasosartan: 1.0
+	fimasartan: 1.0
+	dasabuvir: 0.99
+	palbociclib: 1.0
+	encorafenib: 1.0
+	baloxavir marboxil: 0.98
+	sildenafil: 1.0
+	vardenafil: 1.0
+	quercetin: 0.96
+	eosin: 1.0
+	irbesartan: 0.86
+	gossypol: 1.0
+	sulfaloxic acid: 0.67
+	temoporfin: 1.0
+	valsartan: 0.97
+	oxyphenisatine: 0.92
+	papaveroline: 1.0
+	pirenoxine: 0.7
+	diosmetin: 1.0
+	afatinib: 0.98
+	fedratinib: 0.77
+	bisantrene: 0.95
+	doxefazepam: 0.91
+	hycanthone: 0.94
+	demecolcine: 0.7
+	bumetanide: 1.0
+	nedocromil: 0.93
+	phthalylsulfacetamide: 0.99
+	phthalylsulfathiazole: 0.69
+	piretanide: 0.52
+	voacamine: 1.0
+	letrozole: 0.62
+	phenolphthalein: 0.9
+	tiracizine: 0.94
+	phenolphthalol: 0.97
+	phenolsulfonphthalein: 1.0
+	ethacizine: 0.94
+	mitopodozide: 1.0
+	ketazolam: 0.64
+	procaterol: 0.93
+	dantron: 0.93
+Q9UHD2
+	dabrafenib: 0.69
+	trametinib: 0.53
+	olmesartan medoxomil: 0.59
+	bemotrizinol: 0.73
+	elbasvir: 0.98
+	abemaciclib: 0.99
+	fostamatinib: 1.0
+	encorafenib: 0.83
+	gossypol: 0.79
+	telmisartan: 0.55
+	ledipasvir: 0.63
+	imatinib: 0.65
+	olmutinib: 0.75
+	gilteritinib: 0.78
+	fedratinib: 0.85
+	menadiol sodium diphosphate: 0.83
+	brigatinib: 0.55
+	enasidenib: 0.57
+	midostaurin: 0.89
+	ceritinib: 0.72
+P00750
+	eluxadoline: 0.54
+	peplomycin: 0.56
+	vintafolide: 0.92
+	olmesartan medoxomil: 0.65
+	argatroban: 0.77
+	tubocurarine: 0.52
+	nafamostat: 0.75
+	picodralazine: 0.73
+	macitentan: 0.51
+	hydroxystilbamidine: 0.75
+P12268
+	diosmin: 0.52
+	lapatinib: 0.53
+	nilotinib: 0.65
+	pazopanib: 0.53
+	osimertinib: 0.51
+	tucatinib: 0.5
+	diosmetin: 0.64
+	vemurafenib: 0.62
+	radotinib: 0.69
+	mycophenolic acid: 1.0
+	diquafosol: 0.56
+	quizartinib: 0.6
+	adenosine triphosphate: 0.76
+	adenosine phosphate: 0.61
+	fludarabine phosphate: 0.61
+	nadide: 0.8
+	cangrelor: 0.58
+	mycophenolate mofetil: 0.96
+	thioguanine: 0.65
+P21964
+	baicalin: 0.5
+	diosmetin: 0.57
+	opicapone: 0.79
+	entacapone: 0.88
+	tolcapone: 0.85
+Q9H773
+	ibrutinib: 0.57
+	opicapone: 0.55
+P33527
+	linopirdine: 0.96
+	difenoxin: 0.96
+	benzbromarone: 0.88
+	benziodarone: 0.88
+	oxiconazole: 0.55
+	bezitramide: 0.87
+	diphenoxylate: 0.94
+	loperamide: 0.72
+	apomorphine: 0.57
+	oxagrelate: 0.72
+	gallopamil: 0.99
+	tofisopam: 0.75
+	verapamil: 0.88
+Q13443
+	fosamprenavir: 0.52
