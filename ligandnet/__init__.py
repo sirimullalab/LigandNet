@@ -1,13 +1,13 @@
 import os
 import joblib
-from .ddt import FeatureGenerator
+from .ddt.utility import FeatureGenerator
 import numpy as np
 from tqdm import tqdm
 
 
 class LigandNet(object):
 
-    __models_dir = os.path.join(os.path.dirname(__file__), "models/files")
+    __models_dir = os.path.join(os.path.dirname(__file__), "models")
     __best_models = [
         "O00141.xgb",
         "O00206.rf",
@@ -731,15 +731,16 @@ class LigandNet(object):
         ft = FeatureGenerator()
         if input_type == "smiles":
             ft.load_smiles(input)
-        else:
+        elif input_type == "sdf":
             ft.load_sdf(input)
+        else:
+            raise NotImplementedError
+
         cmpd_id, features = ft.extract_tpatf()
         return cmpd_id, features.reshape(-1, 2692)
 
     # Get predictions
-    def get_prediction(
-        self, input, input_type, confidence_threshold=0.5, model_info=False
-    ):
+    def predict(self, input, input_type, confidence_threshold=0.5, model_info=False):
         results = {}
         cmpd_id, features = self.get_features(input, input_type)
         cmpd_id = np.array(cmpd_id)

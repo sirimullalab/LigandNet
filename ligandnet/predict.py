@@ -46,5 +46,5 @@ if __name__ == "__main__":
         print(results)
 
     if args.smiles is not None:
-        results = l.get_prediction(args.smiles, "smiles", args.confidence)
+        results = l.predict(args.smiles, "smiles", args.confidence)
         print(results)
