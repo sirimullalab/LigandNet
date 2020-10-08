@@ -1,0 +1,14 @@
+uniprot_id,confidence,protein_name
+P00734,0.6,prothrombin
+P02753,0.73,retinol_binding_protein_4
+P05186,0.92,alkaline_phosphatase_tissue_nonspecific_isozyme
+P08684,0.75,cytochrome_p450_3a4
+P10635,0.51,cytochrome_p450_2d6
+P18825,0.98,alpha_2c_adrenergic_receptor
+P19099,0.59,cytochrome_p450_11b2_mitochondrial
+P22460,0.98,potassium_voltage_gated_channel_subfamily_a_member_5
+P31644,0.54,gamma_aminobutyric_acid_receptor_subunit_alpha_5
+P35372,0.97,mu_type_opioid_receptor
+P47712,0.87,cytosolic_phospholipase_a2
+Q05823,0.61,2_5a_dependent_ribonuclease
+Q16445,0.6,gamma_aminobutyric_acid_receptor_subunit_alpha_6

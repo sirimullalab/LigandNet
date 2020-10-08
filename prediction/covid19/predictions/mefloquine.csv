@@ -1,0 +1,8 @@
+uniprot_id,confidence,protein_name
+O14920,0.95,inhibitor_of_nuclear_factor_kappa_b_kinase_subunit_beta
+P06493,0.68,cyclin_dependent_kinase_1
+P07550,0.83,beta_2_adrenergic_receptor
+P18825,0.79,alpha_2c_adrenergic_receptor
+P21397,0.94,amine_oxidase_flavin_containing_b
+P55789,0.63,fad_linked_sulfhydryl_oxidase_alr
+Q15139,0.82,serine_threonine_protein_kinase_d1

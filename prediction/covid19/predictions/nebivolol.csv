@@ -1,0 +1,11 @@
+uniprot_id,confidence,protein_name
+P00797,0.7,renin
+P07550,0.99,beta_2_adrenergic_receptor
+P08588,0.99,beta_1_adrenergic_receptor
+P08908,0.78,5_hydroxytryptamine_receptor_1a
+P18825,0.81,alpha_2c_adrenergic_receptor
+P25100,0.65,alpha_1d_adrenergic_receptor
+P35368,0.53,alpha_1b_adrenergic_receptor
+P35372,0.96,mu_type_opioid_receptor
+Q05823,0.6,2_5a_dependent_ribonuclease
+Q8WUI4,0.58,histone_deacetylase_7

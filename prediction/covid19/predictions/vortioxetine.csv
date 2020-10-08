@@ -1,0 +1,14 @@
+uniprot_id,confidence,protein_name
+O15496,0.51,group_10_secretory_phospholipase_a2
+P02766,0.83,transthyretin
+P08588,0.57,beta_1_adrenergic_receptor
+P08908,0.99,5_hydroxytryptamine_receptor_1a
+P08912,1.0,muscarinic_acetylcholine_receptor_m5
+P09960,0.77,leukotriene_a_4_hydrolase
+P16050,0.91,arachidonate_15_lipoxygenase
+P18825,0.81,alpha_2c_adrenergic_receptor
+P22001,0.61,potassium_voltage_gated_channel_subfamily_a_member_3
+P25100,0.65,alpha_1d_adrenergic_receptor
+P28221,0.9,5_hydroxytryptamine_receptor_1d
+P28222,0.6,5_hydroxytryptamine_receptor_1b
+Q8WUI4,0.51,histone_deacetylase_7
