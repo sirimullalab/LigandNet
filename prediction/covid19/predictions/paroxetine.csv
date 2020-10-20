@@ -1,0 +1,9 @@
+uniprot_id,confidence,protein_name
+P00797,0.97,renin
+P08173,0.64,muscarinic_acetylcholine_receptor_m4
+P08254,0.79,stromelysin_1
+P08912,0.97,muscarinic_acetylcholine_receptor_m5
+P08913,0.75,alpha_2a_adrenergic_receptor
+P20309,0.61,muscarinic_acetylcholine_receptor_m3
+P51452,0.55,dual_specificity_protein_phosphatase_3
+P35372,0.78,mu_type_opioid_receptor

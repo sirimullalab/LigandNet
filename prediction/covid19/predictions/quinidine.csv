@@ -1,0 +1,12 @@
+uniprot_id,confidence,protein_name
+P07550,0.68,beta_2_adrenergic_receptor
+P10635,0.51,cytochrome_p450_2d6
+P08912,0.95,muscarinic_acetylcholine_receptor_m5
+P11229,0.9,muscarinic_acetylcholine_receptor_m1
+P30305,0.51,m_phase_inducer_phosphatase_2
+P21397,0.99,amine_oxidase_flavin_containing_b
+P25100,0.52,alpha_1d_adrenergic_receptor
+P33981,0.64,dual_specificity_protein_kinase_ttk
+P35372,0.95,mu_type_opioid_receptor
+Q13085,0.53,acetyl_coa_carboxylase_1
+Q8WUI4,0.65,histone_deacetylase_7

@@ -1,0 +1,5 @@
+uniprot_id,confidence,protein_name
+P25021,0.51,histamine_h2_receptor
+P43166,0.96,carbonic_anhydrase_7
+Q05823,0.6,2_5a_dependent_ribonuclease
+Q99685,0.51,monoglyceride_lipase

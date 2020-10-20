@@ -1,0 +1,11 @@
+uniprot_id,confidence,protein_name
+P02766,0.74,transthyretin
+P08912,0.69,muscarinic_acetylcholine_receptor_m5
+P10275,0.98,androgen_receptor
+P16050,0.92,arachidonate_15_lipoxygenase
+P22001,0.6,potassium_voltage_gated_channel_subfamily_a_member_3
+P22460,0.83,potassium_voltage_gated_channel_subfamily_a_member_5
+P23415,0.65,glycine_receptor_subunit_alpha_1
+P35354,0.63,prostaglandin_g_h_synthase_2
+Q04759,0.67,protein_kinase_c_theta_type
+Q5S007,0.86,leucine_rich_repeat_serine_threonine_protein_kinase_2

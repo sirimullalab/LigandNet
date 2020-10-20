@@ -1,0 +1,14 @@
+uniprot_id,confidence,protein_name
+O15496,0.54,group_10_secretory_phospholipase_a2
+P10635,0.8,cytochrome_p450_2d6
+P14416,0.55,d2_dopamine_receptor
+P16083,0.53,ribosyldihydronicotinamide_dehydrogenase_quinone_
+P18825,0.65,alpha_2c_adrenergic_receptor
+P21397,0.86,amine_oxidase_flavin_containing_b
+P25100,0.56,alpha_1d_adrenergic_receptor
+Q12884,0.84,prolyl_endopeptidase_fap
+Q13085,0.8,acetyl_coa_carboxylase_1
+Q15139,0.78,serine_threonine_protein_kinase_d1
+Q8WUI4,0.76,histone_deacetylase_7
+Q9H3R0,0.89,lysine_specific_demethylase_4c
+Q99705,0.59,melanin_concentrating_hormone_receptor_1

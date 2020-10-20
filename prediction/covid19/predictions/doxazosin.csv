@@ -1,0 +1,8 @@
+uniprot_id,confidence,protein_name
+O00255,0.76,menin
+P08908,0.55,5_hydroxytryptamine_receptor_1a
+P18054,0.66,arachidonate_12_lipoxygenase_12s_type
+P25100,0.98,alpha_1d_adrenergic_receptor
+P35368,0.96,alpha_1b_adrenergic_receptor
+P41229,0.73,lysine_specific_demethylase_5c
+Q05823,0.61,2_5a_dependent_ribonuclease

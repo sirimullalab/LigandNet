@@ -1,0 +1,9 @@
+uniprot_id,confidence,protein_name
+P08908,0.99,5_hydroxytryptamine_receptor_1a
+P14416,0.99,d2_dopamine_receptor
+P18825,0.63,alpha_2c_adrenergic_receptor
+P21917,0.87,d4_dopamine_receptor
+P21918,0.66,d1b_dopamine_receptor
+P35372,0.69,mu_type_opioid_receptor
+P47898,0.88,5_hydroxytryptamine_receptor_5a
+Q8WUI4,0.57,histone_deacetylase_7

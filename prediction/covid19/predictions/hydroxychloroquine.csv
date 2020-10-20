@@ -1,0 +1,6 @@
+uniprot_id,confidence,protein_name
+O15496,0.52,group_10_secretory_phospholipase_a2
+P18825,0.85,alpha_2c_adrenergic_receptor
+P25100,0.56,alpha_1d_adrenergic_receptor
+Q05823,0.6,2_5a_dependent_ribonuclease
+Q9NR96,0.67,toll_like_receptor_9
