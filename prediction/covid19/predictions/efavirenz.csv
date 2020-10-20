@@ -1,4 +1,4 @@
-uniprot_id,confidence,protein_name
-P08912,0.84,muscarinic_acetylcholine_receptor_m5
-P10275,0.71,androgen_receptor
-P34972,0.69,cannabinoid_receptor_2
+uniprot_id,confidence,protein_name,gene_name
+P08912,0.84,muscarinic_acetylcholine_receptor_m5,CHRM5
+P10275,0.71,androgen_receptor,AR
+P34972,0.69,cannabinoid_receptor_2,CNR2

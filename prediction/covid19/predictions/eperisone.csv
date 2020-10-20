@@ -1,7 +1,7 @@
-uniprot_id,confidence,protein_name
-P08912,0.99,muscarinic_acetylcholine_receptor_m5
-P21397,0.96,amine_oxidase_flavin_containing_b
-P21917,0.71,d4_dopamine_receptor
-P25100,0.55,alpha_1d_adrenergic_receptor
-P35372,0.79,mu_type_opioid_receptor
-Q16445,0.68,gamma_aminobutyric_acid_receptor_subunit_alpha_6
+uniprot_id,confidence,protein_name,gene_name
+P08912,0.99,muscarinic_acetylcholine_receptor_m5,CHRM5
+P21397,0.96,amine_oxidase_flavin_containing_b,MAOA
+P21917,0.71,d4_dopamine_receptor,DRD4
+P25100,0.55,alpha_1d_adrenergic_receptor,ADRA1D
+P35372,0.79,mu_type_opioid_receptor,OPRM1
+Q16445,0.68,gamma_aminobutyric_acid_receptor_subunit_alpha_6,GABRA6

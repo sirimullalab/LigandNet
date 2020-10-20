@@ -1,5 +1,5 @@
-uniprot_id,confidence,protein_name
-P21453,0.71,sphingosine_1_phosphate_receptor_1
-Q8WUI4,0.63,histone_deacetylase_7
-Q99500,0.87,sphingosine_1_phosphate_receptor_3
-Q9H228,0.66,sphingosine_1_phosphate_receptor_5
+uniprot_id,confidence,protein_name,gene_name
+P21453,0.71,sphingosine_1_phosphate_receptor_1,S1PR1
+Q8WUI4,0.63,histone_deacetylase_7,HDAC7
+Q99500,0.87,sphingosine_1_phosphate_receptor_3,S1PR3
+Q9H228,0.66,sphingosine_1_phosphate_receptor_5,S1PR5

@@ -1,7 +1,7 @@
-uniprot_id,confidence,protein_name
-P11387,0.73,dna_topoisomerase_1
-P23141,0.92,liver_carboxylesterase_1
-P23786,0.65,carnitine_o_palmitoyltransferase_2_mitochondrial
-Q16445,0.79,gamma_aminobutyric_acid_receptor_subunit_alpha_6
-Q92633,0.73,lysophosphatidic_acid_receptor_1
-Q99500,0.53,sphingosine_1_phosphate_receptor_3
+uniprot_id,confidence,protein_name,gene_name
+P11387,0.73,dna_topoisomerase_1,TOP1
+P23141,0.92,liver_carboxylesterase_1,CES1
+P23786,0.65,carnitine_o_palmitoyltransferase_2_mitochondrial,CPT2
+Q16445,0.79,gamma_aminobutyric_acid_receptor_subunit_alpha_6,GABRA6
+Q92633,0.73,lysophosphatidic_acid_receptor_1,LPAR1
+Q99500,0.53,sphingosine_1_phosphate_receptor_3,S1PR3

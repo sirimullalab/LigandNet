@@ -1,5 +1,5 @@
-uniprot_id,confidence,protein_name
-P55789,0.72,fad_linked_sulfhydryl_oxidase_alr
-Q05823,0.6,2_5a_dependent_ribonuclease
-Q12852,0.55,mitogen_activated_protein_kinase_kinase_kinase_12
-Q13882,0.65,protein_tyrosine_kinase_6
+uniprot_id,confidence,protein_name,gene_name
+P55789,0.72,fad_linked_sulfhydryl_oxidase_alr,GFER
+Q05823,0.6,2_5a_dependent_ribonuclease,RNASEL
+Q12852,0.55,mitogen_activated_protein_kinase_kinase_kinase_12,MAP3K12
+Q13882,0.65,protein_tyrosine_kinase_6,PTK6

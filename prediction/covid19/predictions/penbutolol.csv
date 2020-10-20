@@ -1,6 +1,6 @@
-uniprot_id,confidence,protein_name
-P07550,0.99,beta_2_adrenergic_receptor
-P08588,1.0,beta_1_adrenergic_receptor
-P08908,0.98,5_hydroxytryptamine_receptor_1a
-P28221,0.7,5_hydroxytryptamine_receptor_1d
-Q8WUI4,0.51,histone_deacetylase_7
+uniprot_id,confidence,protein_name,gene_name
+P07550,0.99,beta_2_adrenergic_receptor,ADRB2
+P08588,1.0,beta_1_adrenergic_receptor,ADRB1
+P08908,0.98,5_hydroxytryptamine_receptor_1a,HTR1A
+P28221,0.7,5_hydroxytryptamine_receptor_1d,HTR1D
+Q8WUI4,0.51,histone_deacetylase_7,HDAC7

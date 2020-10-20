@@ -1,2 +1,2 @@
-uniprot_id,confidence,protein_name
-P09960,0.84,leukotriene_a_4_hydrolase
+uniprot_id,confidence,protein_name,gene_name
+P09960,0.84,leukotriene_a_4_hydrolase,LTA4H

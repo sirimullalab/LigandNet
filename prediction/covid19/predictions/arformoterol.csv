@@ -1,6 +1,6 @@
-uniprot_id,confidence,protein_name
-O95822,0.51,malonyl_coa_decarboxylase_mitochondrial
-P07550,1.0,beta_2_adrenergic_receptor
-P08588,1.0,beta_1_adrenergic_receptor
-P13945,1.0,beta_3_adrenergic_receptor
-P51452,0.59,dual_specificity_protein_phosphatase_3
+uniprot_id,confidence,protein_name,gene_name
+O95822,0.51,malonyl_coa_decarboxylase_mitochondrial,MLYCD
+P07550,1.0,beta_2_adrenergic_receptor,ADRB2
+P08588,1.0,beta_1_adrenergic_receptor,ADRB1
+P13945,1.0,beta_3_adrenergic_receptor,ADRB3
+P51452,0.59,dual_specificity_protein_phosphatase_3,DUSP3

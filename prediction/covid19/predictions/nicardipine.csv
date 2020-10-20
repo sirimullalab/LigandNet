@@ -1,6 +1,6 @@
-uniprot_id,confidence,protein_name
-P25100,0.61,alpha_1d_adrenergic_receptor
-P32245,0.94,melanocortin_receptor_4
-P35368,0.5,alpha_1b_adrenergic_receptor
-Q04206,0.59,transcription_factor_p65
-Q9UBX1,0.58,cathepsin_f
+uniprot_id,confidence,protein_name,gene_name
+P25100,0.61,alpha_1d_adrenergic_receptor,ADRA1D
+P32245,0.94,melanocortin_receptor_4,MC4R
+P35368,0.5,alpha_1b_adrenergic_receptor,ADRA1B
+Q04206,0.59,transcription_factor_p65,RELA
+Q9UBX1,0.58,cathepsin_f,CTSF

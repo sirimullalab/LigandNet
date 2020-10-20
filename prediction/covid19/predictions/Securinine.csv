@@ -1,7 +1,7 @@
-uniprot_id,confidence,protein_name
-P02708,0.7,acetylcholine_receptor_subunit_alpha
-P06276,0.69,cholinesterase
-P18825,0.53,alpha_2c_adrenergic_receptor
-Q05823,0.61,2_5a_dependent_ribonuclease
-Q16445,0.88,gamma_aminobutyric_acid_receptor_subunit_alpha_6
-Q9Y3Q4,0.63,potassium_sodium_hyperpolarization_activated_cyclic_nucleotide_gated_channel_4
+uniprot_id,confidence,protein_name,gene_name
+P02708,0.7,acetylcholine_receptor_subunit_alpha,CHRNA1
+P06276,0.69,cholinesterase,BCHE
+P18825,0.53,alpha_2c_adrenergic_receptor,ADRA2C
+Q05823,0.61,2_5a_dependent_ribonuclease,RNASEL
+Q16445,0.88,gamma_aminobutyric_acid_receptor_subunit_alpha_6,GABRA6
+Q9Y3Q4,0.63,potassium_sodium_hyperpolarization_activated_cyclic_nucleotide_gated_channel_4,HCN4

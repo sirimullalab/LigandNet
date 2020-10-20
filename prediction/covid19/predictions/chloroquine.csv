@@ -1,8 +1,8 @@
-uniprot_id,confidence,protein_name
-O15496,0.6,group_10_secretory_phospholipase_a2
-P06276,0.5,cholinesterase
-P18825,0.79,alpha_2c_adrenergic_receptor
-P25100,0.55,alpha_1d_adrenergic_receptor
-Q05823,0.6,2_5a_dependent_ribonuclease
-Q8WUI4,0.52,histone_deacetylase_7
-Q9NR96,0.64,toll_like_receptor_9
+uniprot_id,confidence,protein_name,gene_name
+O15496,0.6,group_10_secretory_phospholipase_a2,PLA2G10
+P06276,0.5,cholinesterase,BCHE
+P18825,0.79,alpha_2c_adrenergic_receptor,ADRA2C
+P25100,0.55,alpha_1d_adrenergic_receptor,ADRA1D
+Q05823,0.6,2_5a_dependent_ribonuclease,RNASEL
+Q8WUI4,0.52,histone_deacetylase_7,HDAC7
+Q9NR96,0.64,toll_like_receptor_9,TLR9

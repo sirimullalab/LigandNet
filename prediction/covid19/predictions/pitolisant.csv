@@ -1,8 +1,8 @@
-uniprot_id,confidence,protein_name
-P08912,0.53,muscarinic_acetylcholine_receptor_m5
-P11086,0.51,phenylethanolamine_n_methyltransferase
-P18825,0.66,alpha_2c_adrenergic_receptor
-P21397,0.57,amine_oxidase_flavin_containing_b
-P29474,0.69,nitric_oxide_synthase_endothelial
-Q16445,0.66,gamma_aminobutyric_acid_receptor_subunit_alpha_6
-Q12884,0.55,prolyl_endopeptidase_fap
+uniprot_id,confidence,protein_name,gene_name
+P08912,0.53,muscarinic_acetylcholine_receptor_m5,CHRM5
+P11086,0.51,phenylethanolamine_n_methyltransferase,PNMT
+P18825,0.66,alpha_2c_adrenergic_receptor,ADRA2C
+P21397,0.57,amine_oxidase_flavin_containing_b,MAOA
+P29474,0.69,nitric_oxide_synthase_endothelial,NOS3
+Q16445,0.66,gamma_aminobutyric_acid_receptor_subunit_alpha_6,GABRA6
+Q12884,0.55,prolyl_endopeptidase_fap,FAP
