@@ -72,8 +72,8 @@ if __name__ == "__main__":
     parser.add_argument(
         "--smiles", action="store", type=str, dest="smiles", help="SMILES"
     )
-    #     parser.add_argument('--out', action='store', dest='out',
-    #                         required=False, help='Output directory')
+    parser.add_argument('--out', action='store', dest='out',
+                        required=True, help='Output directory')
     parser.add_argument(
         "--confidence",
         action="store",
@@ -100,4 +100,6 @@ if __name__ == "__main__":
 
     if args.smiles is not None:
         results = l.get_prediction(args.smiles, "smiles", args.confidence)
+        with open(os.path.join(args.out, args.smiles+".out"), 'w') as f:
+            json.dump(results, f)
         print(results)
